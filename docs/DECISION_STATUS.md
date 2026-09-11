@@ -74,6 +74,19 @@ Phase 4.2 was committed as `99aadbc` and merged into `main` at `9945b32`. All ne
 
 The owner authorized three local commits on stacked branches, not pushing or merging. See `PHASE_4_STACKED_PRS.md`. Local approval remains self-declared; fingerprints are integrity checks, not authenticated audit signatures. Core confidence assessments still depend on later data-quality/matching engines, and no historical profit dashboard or forecast is being claimed.
 
+## Implemented for Phase 5 review
+
+- Local worker-based historical date-range calculations over canonical MMS production records
+- Effective-dated direct and approved-alias matching for financial-master products, machines, labour, quality, conversions and overheads
+- Estimated Production Value plus material, machine, labour, maintenance, quality, overhead and other direct cost components
+- Complete Total Operating Cost, Estimated Operating Profit and Profit Margin only when mandatory inputs are complete
+- Partial known-cost subtotals and explicit unavailable results without replacing missing values with zero
+- Disclosed MMS material/machine/labour rate fallbacks where matching financial-master rates are absent
+- Full-precision exact aggregation with display-only Indian INR formatting
+- Compact results cards with calculations, missing inputs, source evidence and daily trends hidden until requested
+
+Phase 5 is implemented on `feat/historical-financial-engine` for owner review and remains uncommitted. See `PHASE_5_REVIEW.md`. It does not claim invoice revenue, accounting profit, causal loss attribution, recommendations or forecasts.
+
 ## Provisional financial policies
 
 The following must stay configurable and must not be described as 3D-confirmed:

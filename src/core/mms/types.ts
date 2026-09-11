@@ -252,7 +252,7 @@ export type MmsImportSummary = {
   totalDataIssueCount: number;
 };
 
-export type MmsImportWorkerRequest = {
+export type MmsParseWorkerRequest = {
   type: "parse";
   requestId: string;
   file: {
@@ -263,6 +263,8 @@ export type MmsImportWorkerRequest = {
     buffer: ArrayBuffer;
   };
 };
+
+export type MmsImportWorkerRequest = MmsParseWorkerRequest;
 
 export type MmsImportWorkerResponse =
   | {

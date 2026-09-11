@@ -9,10 +9,12 @@ import type {
   MmsImportWorkerRequest,
   MmsImportWorkerResponse,
 } from "@/core/mms";
+import { calculateHistoricalFinancials } from "@/core/historical";
+import type { HistoricalWorkerRequest, HistoricalWorkerResponse } from "@/core/historical";
 
 let activeImport: CanonicalMmsImport | null = null;
 
-function respond(response: MmsImportWorkerResponse): void {
+function respond(response: MmsImportWorkerResponse | HistoricalWorkerResponse): void {
   self.postMessage(response);
 }
 
@@ -31,9 +33,21 @@ function progress(
 
 self.addEventListener(
   "message",
-  (event: MessageEvent<MmsImportWorkerRequest>) => {
+  (event: MessageEvent<MmsImportWorkerRequest | HistoricalWorkerRequest>) => {
     const request = event.data;
-    if (request.type !== "parse") return;
+    if (request.type === "analyze") {
+      if (!activeImport) {
+        respond({ type: "analysis_failure", requestId: request.requestId, message: "Import the MMS workbook before calculating financial results." });
+        return;
+      }
+      try {
+        const report = calculateHistoricalFinancials(activeImport, request.request.master, request.request.from, request.request.through);
+        respond({ type: "analysis_success", requestId: request.requestId, report });
+      } catch (error) {
+        respond({ type: "analysis_failure", requestId: request.requestId, message: error instanceof Error ? error.message : "Historical financial analysis failed." });
+      }
+      return;
+    }
 
     try {
       progress(request.requestId, 8, "Checking file safety");
@@ -80,4 +94,3 @@ self.addEventListener(
     }
   },
 );
-

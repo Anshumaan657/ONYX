@@ -7,6 +7,7 @@ import type {
   MmsImportWorkerRequest,
   MmsImportWorkerResponse,
 } from "@/core/mms";
+import type { HistoricalAnalysisClient, HistoricalAnalysisRequest, HistoricalWorkerResponse } from "@/core/historical";
 
 const MAXIMUM_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -36,7 +37,7 @@ function displayDateRange(value: [string, string] | null): string {
   return value[0] === value[1] ? value[0] : `${value[0]} — ${value[1]}`;
 }
 
-export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summary: MmsImportSummary) => void; onContinue?: () => void; onReset?: () => void }) {
+export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summary: MmsImportSummary, client: HistoricalAnalysisClient) => void; onContinue?: () => void; onReset?: () => void }) {
   const [state, setState] = useState<ImportState>({ status: "idle" });
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,6 +63,25 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
     onReset?.();
     if (inputRef.current) inputRef.current.value = "";
     setState({ status: "idle" });
+  }
+
+  function analysisClient(worker: Worker): HistoricalAnalysisClient {
+    return {
+      analyze(request: HistoricalAnalysisRequest) {
+        const id = requestId();
+        return new Promise((resolve, reject) => {
+          const handle = (event: MessageEvent<HistoricalWorkerResponse>) => {
+            const response = event.data;
+            if (response.requestId !== id || (response.type !== "analysis_success" && response.type !== "analysis_failure")) return;
+            worker.removeEventListener("message", handle);
+            if (response.type === "analysis_success") resolve(response.report);
+            else reject(new Error(response.message));
+          };
+          worker.addEventListener("message", handle);
+          worker.postMessage({ type: "analyze", requestId: id, request });
+        });
+      },
+    };
   }
 
   function rejectFile(fileName: string, message: string): void {
@@ -117,7 +137,7 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
             return;
           }
           if (response.type === "success") {
-            onReady?.(response.summary);
+            onReady?.(response.summary, analysisClient(worker));
             setState({
               status: "success",
               fileName: file.name,
@@ -367,7 +387,7 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
           </dl>
 
           <div className="mt-5 flex flex-wrap gap-3 print:hidden">
-            {onContinue ? <button className="setup-button" onClick={onContinue} type="button">Continue to financial setup →</button> : null}
+            {onContinue ? <button className="setup-button" onClick={onContinue} type="button">Choose dates and view results →</button> : null}
             <button
               className="rounded-xl bg-[var(--panel)] px-4 py-2.5 text-sm font-bold text-white"
               onClick={downloadReport}
