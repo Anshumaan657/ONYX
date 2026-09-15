@@ -65,7 +65,13 @@ export type HistoricalAnalysisRequest = {
 
 export type HistoricalAnalysisClient = {
   analyze: (request: HistoricalAnalysisRequest) => Promise<HistoricalFinancialReport>;
+  forecast?: (request: HistoricalAnalysisRequest) => Promise<import("../forecast/types").ForecastReport>;
 };
+
+export type ForecastWorkerRequest = { type: "forecast"; requestId: string; request: HistoricalAnalysisRequest };
+export type ForecastWorkerResponse =
+  | { type: "forecast_success"; requestId: string; report: import("../forecast/types").ForecastReport }
+  | { type: "forecast_failure"; requestId: string; message: string };
 
 export type HistoricalWorkerRequest = {
   type: "analyze";
