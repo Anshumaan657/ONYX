@@ -14,6 +14,8 @@ Phase 3.1 adds an adaptive Data Review step: the workbook is processed first, an
 
 Phase 6 adds a closed-by-default loss/profit attribution panel. It ranks the largest calculated operating-cost drivers and gives a short action; unavailable profit is never explained with a guess.
 
+Phase 7 adds a closed-by-default profit opportunities panel. It uses exact calculated cost drivers to suggest short, practical improvement actions without promising savings or inventing missing data.
+
 ## Financial integrity rules
 
 - Actual accounting results, estimated operational results and opportunity losses remain separate.
@@ -68,6 +70,7 @@ The importer does not upload or modify the selected workbook. It rejects unsuppo
 - [Three-PR GitHub handoff](docs/PHASE_4_STACKED_PRS.md)
 - [Phase 5 verification and review](docs/PHASE_5_REVIEW.md)
 - [Phase 6 verification and review](docs/PHASE_6_REVIEW.md)
+- [Phase 7 verification and review](docs/PHASE_7_REVIEW.md)
 - [Development workflow](docs/DEVELOPMENT.md)
 - [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
 - [Decision status](docs/DECISION_STATUS.md)
