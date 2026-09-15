@@ -10,11 +10,12 @@ import type {
   MmsImportWorkerResponse,
 } from "@/core/mms";
 import { calculateHistoricalFinancials } from "@/core/historical";
-import type { HistoricalWorkerRequest, HistoricalWorkerResponse } from "@/core/historical";
+import type { ForecastWorkerRequest, ForecastWorkerResponse, HistoricalWorkerRequest, HistoricalWorkerResponse } from "@/core/historical";
+import { forecastHistorical } from "@/core/forecast";
 
 let activeImport: CanonicalMmsImport | null = null;
 
-function respond(response: MmsImportWorkerResponse | HistoricalWorkerResponse): void {
+function respond(response: MmsImportWorkerResponse | HistoricalWorkerResponse | ForecastWorkerResponse): void {
   self.postMessage(response);
 }
 
@@ -33,8 +34,14 @@ function progress(
 
 self.addEventListener(
   "message",
-  (event: MessageEvent<MmsImportWorkerRequest | HistoricalWorkerRequest>) => {
+  (event: MessageEvent<MmsImportWorkerRequest | HistoricalWorkerRequest | ForecastWorkerRequest>) => {
     const request = event.data;
+    if (request.type === "forecast") {
+      if (!activeImport) { respond({ type: "forecast_failure", requestId: request.requestId, message: "Import the MMS workbook before forecasting." }); return; }
+      try { const historical = calculateHistoricalFinancials(activeImport, request.request.master, request.request.from, request.request.through); respond({ type: "forecast_success", requestId: request.requestId, report: forecastHistorical(historical) }); }
+      catch (error) { respond({ type: "forecast_failure", requestId: request.requestId, message: error instanceof Error ? error.message : "Forecast could not be completed." }); }
+      return;
+    }
     if (request.type === "analyze") {
       if (!activeImport) {
         respond({ type: "analysis_failure", requestId: request.requestId, message: "Import the MMS workbook before calculating financial results." });

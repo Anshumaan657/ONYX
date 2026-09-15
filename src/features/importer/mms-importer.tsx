@@ -7,7 +7,7 @@ import type {
   MmsImportWorkerRequest,
   MmsImportWorkerResponse,
 } from "@/core/mms";
-import type { HistoricalAnalysisClient, HistoricalAnalysisRequest, HistoricalWorkerResponse } from "@/core/historical";
+import type { ForecastWorkerResponse, HistoricalAnalysisClient, HistoricalAnalysisRequest, HistoricalWorkerResponse } from "@/core/historical";
 
 const MAXIMUM_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -79,6 +79,20 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
           };
           worker.addEventListener("message", handle);
           worker.postMessage({ type: "analyze", requestId: id, request });
+        });
+      },
+      forecast(request: HistoricalAnalysisRequest) {
+        const id = requestId();
+        return new Promise((resolve, reject) => {
+          const handle = (event: MessageEvent<ForecastWorkerResponse>) => {
+            const response = event.data;
+            if (response.requestId !== id) return;
+            worker.removeEventListener("message", handle);
+            if (response.type === "forecast_success") resolve(response.report);
+            else reject(new Error(response.message));
+          };
+          worker.addEventListener("message", handle);
+          worker.postMessage({ type: "forecast", requestId: id, request });
         });
       },
     };

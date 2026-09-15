@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { buildLossAttribution, formatExact, type HistoricalAnalysisClient, type HistoricalFinancialReport, type HistoricalMetric, type HistoricalMetricKey } from "@/core/historical";
+import type { ForecastReport } from "@/core/forecast";
 import type { FinancialMaster } from "@/core/financial/schema";
 import type { MmsImportSummary } from "@/core/mms";
 import { exact } from "@/core/policy/exact";
@@ -63,6 +64,14 @@ function AttributionPanel({ report }: { report: HistoricalFinancialReport }) {
   </details>;
 }
 
+function ForecastPanel({ report, onRun, busy, error }: { report: ForecastReport | null; onRun: () => void; busy: boolean; error: string }) {
+  return <section className="mt-8 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5" aria-labelledby="forecast-title">
+    <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[.15em] text-[var(--brand)]">30-day outlook</p><h2 id="forecast-title" className="mt-2 text-xl font-bold">Estimate the next 30 days</h2><p className="mt-1 text-sm text-[var(--muted)]">Uses recent workbook history. No future changes are assumed unless you add them later.</p></div><button type="button" className="setup-button" onClick={onRun} disabled={busy}>{busy ? "Estimating…" : report ? "Refresh estimate" : "Estimate next 30 days"}</button></div>
+    {error ? <p role="alert" className="setup-findings mt-4">{error}</p> : null}
+    {report ? <details className="mt-5 rounded-xl border border-[var(--line)] p-4"><summary className="min-h-11 cursor-pointer py-2 font-bold">View forecast details · {report.confidence} confidence</summary><div className="mt-4 border-t border-[var(--line)] pt-4"><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{(["productionValue", "totalOperatingCost", "operatingProfit", "profitMargin"] as const).map(key => <div className="rounded-xl bg-[var(--canvas)] p-4" key={key}><p className="text-sm font-semibold text-[var(--muted)]">{report.totals[key].label}</p><p className="mt-2 text-lg font-black">{formatExact(report.totals[key].exactValue, report.totals[key].unit)}</p><p className="setup-help">{report.totals[key].status === "available" ? "Predicted average per day" : "Unavailable"}</p></div>)}</div><p className="mt-5 text-sm leading-6 text-[var(--muted)]">The estimate covers {report.from} to {report.through} and uses the {report.model.replaceAll("-", " ")}.</p><h3 className="mt-5 text-sm font-bold">Why this estimate?</h3><ul className="mt-2 space-y-2 text-sm text-[var(--muted)]">{report.assumptions.map(item => <li key={item}>— {item}</li>)}</ul></div></details> : null}
+  </section>;
+}
+
 export function FinancialResults({ source, master, client, onSetup }: { source: MmsImportSummary | null; master: FinancialMaster; client: HistoricalAnalysisClient | null; onSetup: () => void }) {
   const available = source?.dateRange;
   const [from, setFrom] = useState(available?.[0] ?? "");
@@ -70,6 +79,9 @@ export function FinancialResults({ source, master, client, onSetup }: { source: 
   const [report, setReport] = useState<HistoricalFinancialReport | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [forecast, setForecast] = useState<ForecastReport | null>(null);
+  const [forecastBusy, setForecastBusy] = useState(false);
+  const [forecastError, setForecastError] = useState("");
   const rangeInvalid = !available || !from || !through || from > through || (available ? from < available[0] || through > available[1] : true);
   async function run() {
     if (!client || rangeInvalid) return;
@@ -77,6 +89,13 @@ export function FinancialResults({ source, master, client, onSetup }: { source: 
     try { setReport(await client.analyze({ master, from, through })); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Financial analysis could not be completed."); }
     finally { setBusy(false); }
+  }
+  async function runForecast() {
+    if (!client?.forecast || rangeInvalid) return;
+    setForecastBusy(true); setForecastError("");
+    try { setForecast(await client.forecast({ master, from, through })); }
+    catch (reason) { setForecastError(reason instanceof Error ? reason.message : "Forecast could not be completed."); }
+    finally { setForecastBusy(false); }
   }
   const period = useMemo(() => from && through ? from === through ? from : `${from} to ${through}` : "", [from, through]);
   if (!source || !client || !available) return <section className="setup-card"><h1 className="text-2xl font-bold">Financial results</h1><p className="mt-2 text-sm text-[var(--muted)]">Import an MMS workbook with valid dates before choosing a period.</p></section>;
@@ -87,6 +106,7 @@ export function FinancialResults({ source, master, client, onSetup }: { source: 
     {!report ? <div className="mt-5 rounded-2xl border border-dashed border-[var(--line)] p-8 text-center"><p className="font-semibold">Your financial summary will appear here.</p><p className="setup-help">Unknown prices and costs will remain unavailable, never zero.</p></div> : <>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-bold">Financial overview</h2><p className="setup-help">{period} · {report.readiness.usableProductionRows.toLocaleString("en-IN")} usable production records</p></div><span className={`readiness ${report.readiness.status}`}>{report.readiness.status === "ready" ? "Complete calculation" : report.readiness.status === "partial" ? "Partial calculation" : "Financial inputs required"}</span></div>
       <AttributionPanel report={report} />
+      <ForecastPanel report={forecast} onRun={() => void runForecast()} busy={forecastBusy} error={forecastError} />
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{primary.map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
       <h2 className="mt-8 text-xl font-bold">Cost breakdown</h2><div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{costs.map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
       {report.readiness.missing.length ? <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] p-5"><h2 className="font-bold">Complete the missing financial information</h2><p className="mt-2 text-sm leading-6 text-[var(--muted)]">A known subtotal may be shown, but complete profit stays unavailable until required prices and costs are supplied.</p><button type="button" className="setup-secondary mt-4" onClick={onSetup}>Review financial setup</button></div> : null}
