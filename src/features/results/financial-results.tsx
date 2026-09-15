@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatExact, type HistoricalAnalysisClient, type HistoricalFinancialReport, type HistoricalMetric, type HistoricalMetricKey } from "@/core/historical";
+import { buildLossAttribution, formatExact, type HistoricalAnalysisClient, type HistoricalFinancialReport, type HistoricalMetric, type HistoricalMetricKey } from "@/core/historical";
 import type { FinancialMaster } from "@/core/financial/schema";
 import type { MmsImportSummary } from "@/core/mms";
 import { exact } from "@/core/policy/exact";
@@ -51,6 +51,18 @@ function MetricCard({ metric, metricKey, report }: { metric: HistoricalMetric; m
   </article>;
 }
 
+function AttributionPanel({ report }: { report: HistoricalFinancialReport }) {
+  const attribution = buildLossAttribution(report);
+  const toneClass = attribution.tone === "loss" ? "border-rose-500/30 bg-rose-500/[.06]" : attribution.tone === "profit" ? "border-teal-500/30 bg-teal-500/[.06]" : "border-amber-500/30 bg-amber-500/[.06]";
+  return <details className={`mt-5 rounded-2xl border p-5 ${toneClass}`}>
+    <summary className="min-h-11 cursor-pointer py-2 font-bold">Why did this period perform this way?</summary>
+    <div className="mt-4 border-t border-[var(--line)] pt-4"><h3 className="text-lg font-bold">{attribution.headline}</h3><p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">{attribution.explanation}</p>
+      {attribution.drivers.length ? <><h4 className="mt-5 text-sm font-bold">Largest financial drivers</h4><div className="mt-3 grid gap-3 sm:grid-cols-3">{attribution.drivers.map(driver => <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-4" key={driver.key}><p className="text-sm font-bold">{driver.label}</p><p className="mt-1 text-lg font-black">{formatExact(driver.impact, "INR")}</p><p className="setup-help">{driver.explanation}</p><p className="mt-3 text-sm font-semibold">Action: {driver.action}</p></div>)}</div></> : null}
+      <div className="mt-5 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-4"><p className="text-sm font-bold">Suggested next step</p><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{attribution.action}</p><p className="setup-help">Scope: {attribution.scope}. This is a financial explanation, not an accounting diagnosis.</p></div>
+    </div>
+  </details>;
+}
+
 export function FinancialResults({ source, master, client, onSetup }: { source: MmsImportSummary | null; master: FinancialMaster; client: HistoricalAnalysisClient | null; onSetup: () => void }) {
   const available = source?.dateRange;
   const [from, setFrom] = useState(available?.[0] ?? "");
@@ -74,6 +86,7 @@ export function FinancialResults({ source, master, client, onSetup }: { source: 
     <div className="setup-card"><div className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"><label className="setup-label">From<input type="date" className="setup-input" min={coverage[0]} max={coverage[1]} value={from} onInput={event => setFrom(event.currentTarget.value)} /></label><label className="setup-label">Through<input type="date" className="setup-input" min={from || coverage[0]} max={coverage[1]} value={through} onInput={event => setThrough(event.currentTarget.value)} /></label><button type="button" className="setup-button" disabled={busy || rangeInvalid} onClick={() => void run()}>{busy ? "Calculating…" : "Calculate results"}</button></div><p className="setup-help">Workbook coverage: {coverage[0]} to {coverage[1]}.</p>{rangeInvalid ? <p className="setup-findings mt-3">Choose dates inside the workbook coverage.</p> : null}{error ? <p role="alert" className="setup-findings mt-3">{error}</p> : null}</div>
     {!report ? <div className="mt-5 rounded-2xl border border-dashed border-[var(--line)] p-8 text-center"><p className="font-semibold">Your financial summary will appear here.</p><p className="setup-help">Unknown prices and costs will remain unavailable, never zero.</p></div> : <>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-bold">Financial overview</h2><p className="setup-help">{period} · {report.readiness.usableProductionRows.toLocaleString("en-IN")} usable production records</p></div><span className={`readiness ${report.readiness.status}`}>{report.readiness.status === "ready" ? "Complete calculation" : report.readiness.status === "partial" ? "Partial calculation" : "Financial inputs required"}</span></div>
+      <AttributionPanel report={report} />
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{primary.map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
       <h2 className="mt-8 text-xl font-bold">Cost breakdown</h2><div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{costs.map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
       {report.readiness.missing.length ? <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] p-5"><h2 className="font-bold">Complete the missing financial information</h2><p className="mt-2 text-sm leading-6 text-[var(--muted)]">A known subtotal may be shown, but complete profit stays unavailable until required prices and costs are supplied.</p><button type="button" className="setup-secondary mt-4" onClick={onSetup}>Review financial setup</button></div> : null}
