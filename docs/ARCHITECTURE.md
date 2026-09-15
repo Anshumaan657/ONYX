@@ -39,6 +39,14 @@ The worker retains the complete canonical import in memory for future calculatio
 
 No React component calculates revenue or profit. The setup review is not an approval of financial accuracy.
 
+## Historical financial engine
+
+The MMS Web Worker retains the canonical import and accepts a bounded historical-analysis request containing only the selected dates and current financial master. `src/core/historical/engine.ts` is a pure calculation boundary; React renders its serializable report and never performs financial arithmetic.
+
+The engine resolves effective-dated master rows and confirmed aliases, applies direct unit conversions, aggregates with exact rational arithmetic, and returns complete, partial or unavailable metrics. MMS material, machine and operator rates may be used only as disclosed estimated fallbacks. Selling prices and overheads are not invented from production data.
+
+Results preserve source row references and calculation explanations. Detailed evidence and SVG daily trends use progressive disclosure in the UI. This phase does not create loss causality, recommendations or forecasts.
+
 ### Phase 4.1 implementation
 
 - `src/core/policy/schema.ts` defines a strict serializable policy contract, separate from financial-master drafts. Expressions are descriptive text, never evaluated code.

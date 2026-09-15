@@ -8,7 +8,9 @@
 
 Phase 3 adds a guided Financial Setup Wizard on top of the verified MMS importer. It collects product prices/material costs, machine and labour rates, overheads, quality/rework costs, scrap recovery, factory calendar rules, unit conversions and aliases. Effective-date and input checks are shared by the UI and Excel/JSON imports. Draft storage is local, optional and consent-based. Financial calculations remain deferred to their reviewed phase.
 
-Phase 4.2 is merged. Phases 4.3–4.5 add immutable financial releases, approval history, per-result confidence evaluation and a separate **Policies & history** workspace with validated JSON backup/restore and opt-in local persistence. These three checkpoints are committed locally on stacked review branches; pushing and GitHub merging remain owner-controlled. Historical financial engines and the money dashboard are not yet integrated.
+Phase 4 is merged. Phase 5 adds a local historical financial engine and compact date-range results workspace. Complete financial results require complete inputs; otherwise the application shows an explicit known subtotal or unavailable state. Calculations, source evidence and daily trends remain closed until requested.
+
+Phase 3.1 adds an adaptive Data Review step: the workbook is processed first, and users see only missing or conflicting information that may affect results. They can review it or continue with clearly labelled partial results.
 
 ## Financial integrity rules
 
@@ -53,6 +55,7 @@ The importer does not upload or modify the selected workbook. It rejects unsuppo
 - [Excel input guide](docs/EXCEL_INPUT_GUIDE.md)
 - [Financial setup guide](docs/FINANCIAL_SETUP.md)
 - [Phase 3 verification and review](docs/PHASE_3_REVIEW.md)
+- [Phase 3.1 adaptive data review](docs/PHASE_3_1_REVIEW.md)
 - [Phase 4 subphase plan and GitHub workflow](docs/PHASE_4_PLAN.md)
 - [Phase 4.1 verification and review](docs/PHASE_4_1_REVIEW.md)
 - [Formula definitions and execution boundaries](docs/FORMULA_REFERENCE.md)
@@ -61,6 +64,7 @@ The importer does not upload or modify the selected workbook. It rejects unsuppo
 - [Confidence and policy workspace](docs/PHASE_4_4_REVIEW.md)
 - [Archive portability and final verification](docs/PHASE_4_5_REVIEW.md)
 - [Three-PR GitHub handoff](docs/PHASE_4_STACKED_PRS.md)
+- [Phase 5 verification and review](docs/PHASE_5_REVIEW.md)
 - [Development workflow](docs/DEVELOPMENT.md)
 - [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
 - [Decision status](docs/DECISION_STATUS.md)
