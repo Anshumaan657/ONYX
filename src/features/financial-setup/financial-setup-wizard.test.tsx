@@ -13,10 +13,10 @@ describe("guided financial setup", () => {
   it("shows a single primary workflow step and preserves state across navigation", () => {
     render(<AnalysisWorkspace />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Start with your MMS workbook");
-    fireEvent.click(screen.getByRole("button", { name: "2 · Financial setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Financial setup" }));
     fireEvent.change(screen.getByLabelText("Factory name"), { target: { value: "QA Factory" } });
     fireEvent.click(screen.getByRole("button", { name: "1 · Import data" }));
-    fireEvent.click(screen.getByRole("button", { name: "2 · Financial setup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Financial setup" }));
     expect(screen.getByLabelText("Factory name")).toHaveValue("QA Factory");
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Set up your financial inputs");
   });

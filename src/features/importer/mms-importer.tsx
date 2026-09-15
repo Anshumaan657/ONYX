@@ -387,7 +387,7 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
           </dl>
 
           <div className="mt-5 flex flex-wrap gap-3 print:hidden">
-            {onContinue ? <button className="setup-button" onClick={onContinue} type="button">Choose dates and view results →</button> : null}
+            {onContinue ? <button className="setup-button" onClick={onContinue} type="button">Review data and continue →</button> : null}
             <button
               className="rounded-xl bg-[var(--panel)] px-4 py-2.5 text-sm font-bold text-white"
               onClick={downloadReport}
