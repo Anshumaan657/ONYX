@@ -12,6 +12,8 @@ Phase 4 is merged. Phase 5 adds a local historical financial engine and compact 
 
 Phase 3.1 adds an adaptive Data Review step: the workbook is processed first, and users see only missing or conflicting information that may affect results. They can review it or continue with clearly labelled partial results.
 
+Phase 6 adds a closed-by-default loss/profit attribution panel. It ranks the largest calculated operating-cost drivers and gives a short action; unavailable profit is never explained with a guess.
+
 ## Financial integrity rules
 
 - Actual accounting results, estimated operational results and opportunity losses remain separate.
@@ -65,6 +67,7 @@ The importer does not upload or modify the selected workbook. It rejects unsuppo
 - [Archive portability and final verification](docs/PHASE_4_5_REVIEW.md)
 - [Three-PR GitHub handoff](docs/PHASE_4_STACKED_PRS.md)
 - [Phase 5 verification and review](docs/PHASE_5_REVIEW.md)
+- [Phase 6 verification and review](docs/PHASE_6_REVIEW.md)
 - [Development workflow](docs/DEVELOPMENT.md)
 - [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
 - [Decision status](docs/DECISION_STATUS.md)
