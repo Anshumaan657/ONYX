@@ -38,7 +38,7 @@ self.addEventListener(
     const request = event.data;
     if (request.type === "forecast") {
       if (!activeImport) { respond({ type: "forecast_failure", requestId: request.requestId, message: "Import the MMS workbook before forecasting." }); return; }
-      try { const historical = calculateHistoricalFinancials(activeImport, request.request.master, request.request.from, request.request.through); respond({ type: "forecast_success", requestId: request.requestId, report: forecastHistorical(historical) }); }
+      try { const historical = calculateHistoricalFinancials(activeImport, request.request.master, request.request.from, request.request.through, new Date().toISOString(), request.request.filters); respond({ type: "forecast_success", requestId: request.requestId, report: forecastHistorical(historical) }); }
       catch (error) { respond({ type: "forecast_failure", requestId: request.requestId, message: error instanceof Error ? error.message : "Forecast could not be completed." }); }
       return;
     }
@@ -48,7 +48,7 @@ self.addEventListener(
         return;
       }
       try {
-        const report = calculateHistoricalFinancials(activeImport, request.request.master, request.request.from, request.request.through);
+        const report = calculateHistoricalFinancials(activeImport, request.request.master, request.request.from, request.request.through, new Date().toISOString(), request.request.filters);
         respond({ type: "analysis_success", requestId: request.requestId, report });
       } catch (error) {
         respond({ type: "analysis_failure", requestId: request.requestId, message: error instanceof Error ? error.message : "Historical financial analysis failed." });

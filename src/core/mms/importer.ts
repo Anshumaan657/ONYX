@@ -1112,6 +1112,7 @@ export function summarizeMmsImport(result: CanonicalMmsImport): MmsImportSummary
     catalog: {
       products: [...new Set(result.productionRecords.filter(record => record.includedInTotals).map(record => record.product.partNumber || record.product.productName || record.product.partName).filter(Boolean))].sort(),
       machines: [...new Set([...result.productionRecords, ...result.downtimeRecords].filter(record => record.includedInTotals).map(record => record.machine).filter(Boolean))].sort(),
+      shifts: [...new Set(result.productionRecords.filter(record => record.includedInTotals).map(record => record.shift).filter(Boolean))].sort(),
     },
     compatibility: result.compatibility,
     stats: result.stats,
