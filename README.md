@@ -20,6 +20,8 @@ The 30-day forecast baseline is now available after historical calculation. It u
 
 Phase 8 adds unified, collapsed filters for date range, product, machine, shift and result status. The same data selection is used by historical calculations, explanations, trends and forecasts.
 
+Phase 9 adds an owner-focused snapshot above the financial cards. It surfaces the period state, readiness and usable-record coverage without duplicating the metric values or opening detail panels automatically.
+
 ## Financial integrity rules
 
 - Actual accounting results, estimated operational results and opportunity losses remain separate.
@@ -77,6 +79,7 @@ The importer does not upload or modify the selected workbook. It rejects unsuppo
 - [Phase 7 verification and review](docs/PHASE_7_REVIEW.md)
 - [30-day forecast baseline](docs/PHASE_11_12_FORECAST_REVIEW.md)
 - [Phase 8 unified filters](docs/PHASE_8_REVIEW.md)
+- [Phase 9 owner dashboard](docs/PHASE_9_REVIEW.md)
 - [Development workflow](docs/DEVELOPMENT.md)
 - [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
 - [Decision status](docs/DECISION_STATUS.md)
