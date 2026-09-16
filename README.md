@@ -18,6 +18,8 @@ Phase 7 adds a closed-by-default profit opportunities panel. It uses exact calcu
 
 The 30-day forecast baseline is now available after historical calculation. It uses the last 30 daily values, shows confidence and assumptions, and keeps any metric with missing source data unavailable.
 
+Phase 8 adds unified, collapsed filters for date range, product, machine, shift and result status. The same data selection is used by historical calculations, explanations, trends and forecasts.
+
 ## Financial integrity rules
 
 - Actual accounting results, estimated operational results and opportunity losses remain separate.
@@ -74,6 +76,7 @@ The importer does not upload or modify the selected workbook. It rejects unsuppo
 - [Phase 6 verification and review](docs/PHASE_6_REVIEW.md)
 - [Phase 7 verification and review](docs/PHASE_7_REVIEW.md)
 - [30-day forecast baseline](docs/PHASE_11_12_FORECAST_REVIEW.md)
+- [Phase 8 unified filters](docs/PHASE_8_REVIEW.md)
 - [Development workflow](docs/DEVELOPMENT.md)
 - [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
 - [Decision status](docs/DECISION_STATUS.md)

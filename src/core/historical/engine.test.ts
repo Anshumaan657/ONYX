@@ -76,6 +76,12 @@ describe("historical revenue and cost engine", () => {
     expect(formatExact(exact("12345678901234567890.125").toJSON(), "INR")).toBe("₹1,23,45,67,89,01,23,45,67,890.13");
     expect(formatExact(exact("-1234.5").toJSON(), "INR")).toBe("-₹1,234.50");
   });
+
+  it("applies product, machine and shift filters before calculation", () => {
+    const report = calculateHistoricalFinancials(source(), master(), "2026-01-02", "2026-01-02", "2026-01-03T00:00:00.000Z", { product: "Other product", machine: "M1", shift: "Shift 1" });
+    expect(report.readiness.usableProductionRows).toBe(0);
+    expect(report.totals.productionValue.exactValue).toBeNull();
+  });
 });
 
 const realSamplePath = process.env.MMS_SAMPLE_PATH;

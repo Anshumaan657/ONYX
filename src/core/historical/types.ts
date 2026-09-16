@@ -61,6 +61,13 @@ export type HistoricalAnalysisRequest = {
   master: FinancialMaster;
   from: string;
   through: string;
+  filters?: HistoricalFilters;
+};
+
+export type HistoricalFilters = {
+  product?: string;
+  machine?: string;
+  shift?: string;
 };
 
 export type HistoricalAnalysisClient = {

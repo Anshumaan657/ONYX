@@ -3,7 +3,7 @@ import { activeOn, keyOf, numberValue, validDate } from "../financial/validation
 import type { CanonicalMmsImport, CanonicalProductionRecord } from "../mms";
 import { exact, type Exact, type ExactValue } from "../policy/exact";
 import { runBoundFormula } from "../policy/formulas";
-import { HISTORICAL_METRIC_KEYS, type HistoricalDayResult, type HistoricalFinancialReport, type HistoricalMetric, type HistoricalMetricKey, type MetricStatus } from "./types";
+import { HISTORICAL_METRIC_KEYS, type HistoricalDayResult, type HistoricalFinancialReport, type HistoricalMetric, type HistoricalMetricKey, type MetricStatus, type HistoricalFilters } from "./types";
 
 const ZERO = exact("0");
 const formula = (policyId: string, values: Record<string, Exact>) => runBoundFormula(policyId, "1.0.0", values).value;
@@ -268,12 +268,16 @@ function combine(days: HistoricalDayResult[], key: HistoricalMetricKey): Histori
   return metric(key, source);
 }
 
-export function calculateHistoricalFinancials(source: CanonicalMmsImport, master: FinancialMaster, from: string, through: string, generatedAt = new Date().toISOString()): HistoricalFinancialReport {
+export function calculateHistoricalFinancials(source: CanonicalMmsImport, master: FinancialMaster, from: string, through: string, generatedAt = new Date().toISOString(), filters: HistoricalFilters = {}): HistoricalFinancialReport {
   const selectedDates = dates(from, through);
   const byDate = new Map(selectedDates.map(date => [date, [] as CanonicalProductionRecord[]]));
   let excluded = 0;
   for (const row of source.productionRecords) {
     if (!row.includedInTotals) { excluded++; continue; }
+    const product = row.product.partNumber || row.product.productName || row.product.partName;
+    if (filters.product && keyOf(product) !== keyOf(filters.product)) continue;
+    if (filters.machine && keyOf(row.machine) !== keyOf(filters.machine)) continue;
+    if (filters.shift && keyOf(row.shift) !== keyOf(filters.shift)) continue;
     if (row.businessDate && byDate.has(row.businessDate)) byDate.get(row.businessDate)!.push(row);
   }
   const days = selectedDates.map(date => calculateDay(master, byDate.get(date)!, date));
