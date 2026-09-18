@@ -7,7 +7,7 @@ import { emptyMaster } from "@/core/financial/schema";
 import { DRAFT_KEY } from "@/core/financial/draft-storage";
 import { MmsImporter } from "@/features/importer/mms-importer";
 
-afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); localStorage.removeItem(DRAFT_KEY); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); window.localStorage.removeItem(DRAFT_KEY); });
 
 describe("guided financial setup", () => {
   it("shows a single primary workflow step and preserves state across navigation", () => {
@@ -74,9 +74,9 @@ describe("local consent UI", () => {
     expect(setItem).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("checkbox"));
     await waitFor(() => expect(setItem).toHaveBeenCalled());
-    expect(localStorage.getItem(DRAFT_KEY)).not.toBeNull();
+    expect(window.localStorage.getItem(DRAFT_KEY)).not.toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Delete saved draft & stop saving" }));
-    expect(localStorage.getItem(DRAFT_KEY)).toBeNull();
+    expect(window.localStorage.getItem(DRAFT_KEY)).toBeNull();
     expect(screen.getByRole("checkbox")).not.toBeChecked();
   });
   it("keeps the draft in memory if consent saving fails", () => {

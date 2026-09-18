@@ -8,6 +8,7 @@ import type { MmsImportSummary } from "@/core/mms";
 import { exact } from "@/core/policy/exact";
 import { OwnerDashboard } from "@/features/dashboard/owner-dashboard";
 import { forecastCsv, historicalCsv, reportJson } from "@/core/reports";
+import { buildActionPlan } from "@/core/recommendations";
 
 const primary: HistoricalMetricKey[] = ["productionValue", "totalOperatingCost", "operatingProfit", "profitMargin"];
 const costs: HistoricalMetricKey[] = ["materialCost", "machineCost", "labourCost", "maintenanceCost", "qualityCost", "allocatedOverhead", "otherDirectCost"];
@@ -57,12 +58,15 @@ function MetricCard({ metric, metricKey, report }: { metric: HistoricalMetric; m
 
 function AttributionPanel({ report }: { report: HistoricalFinancialReport }) {
   const attribution = buildLossAttribution(report);
+  const actionPlan = buildActionPlan(report);
   const toneClass = attribution.tone === "loss" ? "border-rose-500/30 bg-rose-500/[.06]" : attribution.tone === "profit" ? "border-teal-500/30 bg-teal-500/[.06]" : "border-amber-500/30 bg-amber-500/[.06]";
   return <details className={`mt-5 rounded-2xl border p-5 ${toneClass}`}>
     <summary className="min-h-11 cursor-pointer py-2 font-bold">Why did this period perform this way?</summary>
     <div className="mt-4 border-t border-[var(--line)] pt-4"><h3 className="text-lg font-bold">{attribution.headline}</h3><p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">{attribution.explanation}</p>
       {attribution.drivers.length ? <><h4 className="mt-5 text-sm font-bold">Largest financial drivers</h4><div className="mt-3 grid gap-3 sm:grid-cols-3">{attribution.drivers.map(driver => <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-4" key={driver.key}><p className="text-sm font-bold">{driver.label}</p><p className="mt-1 text-lg font-black">{formatExact(driver.impact, "INR")}</p><p className="setup-help">{driver.explanation}</p><p className="mt-3 text-sm font-semibold">Action: {driver.action}</p></div>)}</div></> : null}
-      <div className="mt-5 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-4"><p className="text-sm font-bold">Suggested next step</p><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{attribution.action}</p><p className="setup-help">Scope: {attribution.scope}. This is a financial explanation, not an accounting diagnosis.</p></div>
+      <div className="mt-5 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-4"><p className="text-sm font-bold">Suggested next step</p><p className="mt-1 text-sm leading-6 text-[var(--muted)]">{attribution.action}</p><p className="setup-help">Scope: {attribution.scope}. This is a financial explanation, not an accounting diagnosis.</p>
+        <details className="mt-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] p-4"><summary className="min-h-11 cursor-pointer py-2 font-bold">{actionPlan.headline}</summary><div className="mt-3 border-t border-[var(--line)] pt-3"><p className="text-sm leading-6 text-[var(--muted)]">{actionPlan.summary}</p><p className="setup-help mt-2">Confidence: {actionPlan.confidence}. {actionPlan.caveat}</p><div className="mt-4 grid gap-3">{actionPlan.recommendations.map(item => <article className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-4" key={item.id}><p className="text-sm font-bold">{item.title}</p><p className="mt-2 text-sm leading-6">{item.action}</p><p className="setup-help mt-2">Why: {item.reason}</p>{item.evidence.length ? <p className="setup-help mt-2">Evidence: {item.evidence.join(" · ")}</p> : null}</article>)}</div></div></details>
+      </div>
     </div>
   </details>;
 }
