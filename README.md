@@ -22,6 +22,10 @@ Phase 8 adds unified, collapsed filters for date range, product, machine, shift 
 
 Phase 9 adds an owner-focused snapshot above the financial cards. It surfaces the period state, readiness and usable-record coverage without duplicating the metric values or opening detail panels automatically.
 
+Phase 10 adds a collapsed Reports & exports panel for filtered historical CSV, forecast CSV, JSON report bundles and print-ready reports. Exports are generated locally and preserve statuses, assumptions and unavailable values.
+
+Phase 13 adds an optional local 30-day rolling back-test for the forecast. It reports MAE, MAPE and a confidence level only when at least 60 days of workbook history are available.
+
 ## Financial integrity rules
 
 - Actual accounting results, estimated operational results and opportunity losses remain separate.
@@ -80,6 +84,8 @@ The importer does not upload or modify the selected workbook. It rejects unsuppo
 - [30-day forecast baseline](docs/PHASE_11_12_FORECAST_REVIEW.md)
 - [Phase 8 unified filters](docs/PHASE_8_REVIEW.md)
 - [Phase 9 owner dashboard](docs/PHASE_9_REVIEW.md)
+- [Phase 10 reports and exports](docs/PHASE_10_REVIEW.md)
+- [Phase 13 forecast validation](docs/PHASE_13_REVIEW.md)
 - [Development workflow](docs/DEVELOPMENT.md)
 - [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
 - [Decision status](docs/DECISION_STATUS.md)
