@@ -10,12 +10,12 @@ import type {
   MmsImportWorkerResponse,
 } from "@/core/mms";
 import { calculateHistoricalFinancials } from "@/core/historical";
-import type { ForecastWorkerRequest, ForecastWorkerResponse, HistoricalWorkerRequest, HistoricalWorkerResponse } from "@/core/historical";
-import { forecastHistorical } from "@/core/forecast";
+import type { ForecastValidationWorkerRequest, ForecastValidationWorkerResponse, ForecastWorkerRequest, ForecastWorkerResponse, HistoricalWorkerRequest, HistoricalWorkerResponse } from "@/core/historical";
+import { forecastHistorical, validateForecast } from "@/core/forecast";
 
 let activeImport: CanonicalMmsImport | null = null;
 
-function respond(response: MmsImportWorkerResponse | HistoricalWorkerResponse | ForecastWorkerResponse): void {
+function respond(response: MmsImportWorkerResponse | HistoricalWorkerResponse | ForecastWorkerResponse | ForecastValidationWorkerResponse): void {
   self.postMessage(response);
 }
 
@@ -34,8 +34,14 @@ function progress(
 
 self.addEventListener(
   "message",
-  (event: MessageEvent<MmsImportWorkerRequest | HistoricalWorkerRequest | ForecastWorkerRequest>) => {
+  (event: MessageEvent<MmsImportWorkerRequest | HistoricalWorkerRequest | ForecastWorkerRequest | ForecastValidationWorkerRequest>) => {
     const request = event.data;
+    if (request.type === "forecast_validation") {
+      if (!activeImport) { respond({ type: "forecast_validation_failure", requestId: request.requestId, message: "Import the MMS workbook before validating a forecast." }); return; }
+      try { respond({ type: "forecast_validation_success", requestId: request.requestId, report: validateForecast(activeImport, request.request.master, request.request.from, request.request.through, request.request.filters) }); }
+      catch (error) { respond({ type: "forecast_validation_failure", requestId: request.requestId, message: error instanceof Error ? error.message : "Forecast validation failed." }); }
+      return;
+    }
     if (request.type === "forecast") {
       if (!activeImport) { respond({ type: "forecast_failure", requestId: request.requestId, message: "Import the MMS workbook before forecasting." }); return; }
       try { const historical = calculateHistoricalFinancials(activeImport, request.request.master, request.request.from, request.request.through, new Date().toISOString(), request.request.filters); respond({ type: "forecast_success", requestId: request.requestId, report: forecastHistorical(historical) }); }
