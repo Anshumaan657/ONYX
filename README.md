@@ -26,6 +26,8 @@ Phase 10 adds a collapsed Reports & exports panel for filtered historical CSV, f
 
 Phase 13 adds an optional local 30-day rolling back-test for the forecast. It reports MAE, MAPE and a confidence level only when at least 60 days of workbook history are available.
 
+Phase 14 adds closed-by-default action recommendations. A user can open a period explanation to see evidence-based “Maximize the profit” or “Minimize the loss” actions, while incomplete results point back to missing inputs without guessing.
+
 ## Financial integrity rules
 
 - Actual accounting results, estimated operational results and opportunity losses remain separate.
@@ -86,6 +88,7 @@ The importer does not upload or modify the selected workbook. It rejects unsuppo
 - [Phase 9 owner dashboard](docs/PHASE_9_REVIEW.md)
 - [Phase 10 reports and exports](docs/PHASE_10_REVIEW.md)
 - [Phase 13 forecast validation](docs/PHASE_13_REVIEW.md)
+- [Phase 14 action recommendations](docs/PHASE_14_REVIEW.md)
 - [Development workflow](docs/DEVELOPMENT.md)
 - [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
 - [Decision status](docs/DECISION_STATUS.md)
