@@ -46,7 +46,7 @@ No new browser session was required for this domain-only change. Existing wizard
 ## Review and commit commands
 
 ```bash
-cd "/Users/anshumaansharma0404gmail.com/Desktop/3D-Profit-Intelligence"
+cd "/Users/anshumaansharma0404gmail.com/3D-Local/Onyx"
 git switch feat/policy-formulas
 git status --short
 (
@@ -78,7 +78,7 @@ git push -u origin feat/policy-formulas
 
 ## GitHub website PR
 
-Open [the Phase 4.2 comparison](https://github.com/Anshumaan657/3D-Profit-Intelligence/compare/main...feat/policy-formulas). Confirm **base: main**, **compare: feat/policy-formulas**.
+Open [the Phase 4.2 comparison](https://github.com/Anshumaan657/Onyx/compare/main...feat/policy-formulas). Confirm **base: main**, **compare: feat/policy-formulas**.
 
 Title:
 

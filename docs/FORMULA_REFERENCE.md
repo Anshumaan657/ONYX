@@ -4,7 +4,7 @@ This is a code-reviewed implementation reference, **not written 3D business appr
 
 ## Specification authority
 
-The project-owner-supplied **3D Profit Intelligence — Complete Project Decisions** is authoritative. The decision numbers below refer to that document. The earlier 3D application's `docs/FORMULAS_AND_POLICIES.md` and `app/calculation-policy.ts` were inspected as historical references. This project's newer rules take precedence:
+The project-owner-supplied **Onyx — Complete Project Decisions** is authoritative. The decision numbers below refer to that document. The earlier 3D application's `docs/FORMULAS_AND_POLICIES.md` and `app/calculation-policy.ts` were inspected as historical references. This project's newer rules take precedence:
 
 - Decisions 49–50: reported quantity is authoritative, and good quantity is `max(0, reported − rejected − rework)`; scrap is not deducted here.
 - Decisions 58–59: do not carry over the older app's six-decimal intermediate rounding.

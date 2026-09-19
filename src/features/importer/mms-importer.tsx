@@ -251,7 +251,7 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
   return (
     <section
       aria-labelledby="import-heading"
-      className="rounded-[2rem] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_24px_70px_rgba(15,23,42,0.07)] sm:p-7 lg:p-8"
+      className="setup-card sm:p-7 lg:p-8"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -269,8 +269,8 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
             checked and normalized inside this browser tab.
           </p>
         </div>
-        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-teal-500/10 px-3 py-1.5 text-xs font-bold text-[var(--brand)]">
-          <span className="h-2 w-2 rounded-full bg-teal-500" />
+        <span className="status-badge complete">
+          <span aria-hidden="true">●</span>
           Local only
         </span>
       </div>
@@ -278,8 +278,8 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
       {state.status === "idle" ? (
         <div
           className={`mt-7 grid min-h-56 cursor-pointer place-items-center rounded-3xl border-2 border-dashed p-7 text-center transition ${
-            dragActive
-              ? "border-[var(--brand)] bg-teal-500/10"
+              dragActive
+              ? "border-[var(--brand)] bg-(--brand-soft)"
               : "border-[var(--line)] bg-[var(--canvas)] hover:border-[var(--brand)]"
           }`}
           onClick={() => inputRef.current?.click()}
@@ -314,7 +314,7 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
               or choose a file · .xls and .xlsx · up to 50 MB
             </p>
             <label
-              className="mt-5 inline-flex cursor-pointer rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_30px_rgba(13,148,136,0.22)]"
+              className="setup-button mt-5 inline-flex cursor-pointer"
               onClick={(event) => event.stopPropagation()}
             >
               Choose workbook
@@ -366,7 +366,7 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
 
       {state.status === "success" ? (
         <div aria-live="polite" className="mt-7">
-          <div className="flex flex-col gap-4 rounded-3xl border border-teal-500/25 bg-teal-500/[0.07] p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="tone-panel complete flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--brand)]">
                 {state.summary.compatibility.status === "compatible"
@@ -379,7 +379,7 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
               </p>
             </div>
             <button
-              className="rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-2.5 text-sm font-bold"
+              className="setup-secondary"
               onClick={reset}
               type="button"
             >
@@ -387,7 +387,7 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
             </button>
           </div>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
             {[
               ["Production records", state.summary.productionRecordCount.toLocaleString()],
               ["Downtime records", state.summary.downtimeRecordCount.toLocaleString()],
@@ -435,8 +435,8 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
       ) : null}
 
       {state.status === "failure" ? (
-        <div aria-live="assertive" className="mt-7 rounded-3xl border border-rose-500/25 bg-rose-500/[0.07] p-5">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-rose-600">
+        <div aria-live="assertive" className="tone-panel unavailable mt-7 p-5">
+          <p className="status-badge unavailable">
             Import needs attention
           </p>
           <p className="mt-2 font-bold">{state.fileName || "Workbook import"}</p>

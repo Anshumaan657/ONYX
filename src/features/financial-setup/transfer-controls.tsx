@@ -45,7 +45,7 @@ export function TransferControls({ master, onReplace }: { master: FinancialMaste
     try {
       const io = await import("@/core/financial/portability");
       const value = template ? emptyMaster() : master;
-      const filename = `3D-Financial-Master_${template ? "template" : `${master.factory.replace(/[^a-zA-Z0-9-]/g, "_").slice(0, 60) || "draft"}_r${master.revision}`}.${format}`;
+      const filename = `Onyx-Financial-Master_${template ? "template" : `${master.factory.replace(/[^a-zA-Z0-9-]/g, "_").slice(0, 60) || "draft"}_r${master.revision}`}.${format}`;
       if (format === "json") download(io.exportMasterJson(value), "application/json", filename);
       else download(io.exportMasterExcel(value), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
       setNotice(template ? "Blank template downloaded. No example prices have been inserted." : "Draft exported, including incomplete entries. Review findings before using it for calculations.");

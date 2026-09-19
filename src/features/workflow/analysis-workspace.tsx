@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type { MmsImportSummary } from "@/core/mms";
 import { MmsImporter } from "@/features/importer/mms-importer";
 import { FinancialSetupWizard } from "@/features/financial-setup/financial-setup-wizard";
@@ -34,19 +35,34 @@ export function AnalysisWorkspace() {
   function restoreMaster(value: FinancialMaster) { setSetupSeed(value); setMaster(value); setSetupGeneration(current => current + 1); }
   const [source, setSource] = useState<MmsImportSummary | null>(null);
   const [analysisClient, setAnalysisClient] = useState<HistoricalAnalysisClient | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  useEffect(() => {
+    const saved = window.localStorage.getItem("onyx-theme");
+    const next = saved === "dark" || saved === "light"
+      ? saved
+      : typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    queueMicrotask(() => setTheme(next));
+    document.documentElement.dataset.theme = next;
+  }, []);
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    window.localStorage.setItem("onyx-theme", next);
+  }
   function imported(summary: MmsImportSummary, client: HistoricalAnalysisClient) { setSource(summary); setAnalysisClient(client); setStep("review"); }
   function resetSource() { setSource(null); setAnalysisClient(null); setStep("import"); }
-  return <main className="mx-auto min-h-screen w-full max-w-[1280px] px-4 py-5 sm:px-8">
-    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--line)] pb-5">
-      <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#0f766e] text-sm font-black text-white">3D</span><div><p className="text-sm font-bold">3D Profit Intelligence</p><p className="text-xs text-[var(--muted)]">Local-first financial workspace</p></div></div>
-      <span className="text-xs text-[var(--muted)]">Private on your device · No cloud upload</span>
+  return <main className="app-shell mx-auto min-h-screen w-full max-w-[1440px] px-[clamp(24px,4vw,64px)] py-5">
+    <header className="app-header flex flex-wrap items-center justify-between gap-4">
+      <Link href="/" className="brand-home" aria-label="Onyx home"><span className="brand-wordmark">ONYX</span><span className="brand-subtitle">Local-first financial workspace</span></Link>
+      <div className="header-actions"><span className="privacy-note">Private on your device · No cloud upload</span><button className="theme-toggle" type="button" role="switch" aria-checked={theme === "dark"} aria-label="Toggle dark mode" onClick={toggleTheme}><span className="theme-toggle-track" aria-hidden="true"><span className="theme-toggle-thumb" /></span><span className="theme-toggle-label">{theme === "dark" ? "Dark" : "Light"}</span></button></div>
     </header>
-    <nav className="my-6 flex flex-wrap gap-2" aria-label="Analysis workflow">
-      <button className={step === "import" ? "setup-button" : "setup-secondary"} aria-current={step === "import" ? "step" : undefined} onClick={() => setStep("import")}>1 · Import data{source ? " ✓" : ""}</button>
-      <button className={step === "review" ? "setup-button" : "setup-secondary"} aria-current={step === "review" ? "step" : undefined} disabled={!source} onClick={() => setStep("review")}>2 · Data review</button>
-      <button className={step === "setup" ? "setup-button" : "setup-secondary"} aria-current={step === "setup" ? "step" : undefined} onClick={() => setStep("setup")}>Financial setup</button>
-      <button className={step === "results" ? "setup-button" : "setup-secondary"} aria-current={step === "results" ? "step" : undefined} disabled={!source} onClick={() => setStep("results")}>3 · Financial results</button>
-      <button className="setup-secondary ml-auto" aria-current={step === "policies" ? "page" : undefined} onClick={() => setStep("policies")}>Policies & history</button>
+    <nav className="workflow-nav my-6 flex flex-wrap gap-2" aria-label="Analysis workflow">
+      <button className={step === "import" ? "workflow-step active" : "workflow-step"} aria-current={step === "import" ? "step" : undefined} onClick={() => setStep("import")}>1 · Import data{source ? " ✓" : ""}</button>
+      <button className={step === "review" ? "workflow-step active" : "workflow-step"} aria-current={step === "review" ? "step" : undefined} disabled={!source} onClick={() => setStep("review")}>2 · Data review</button>
+      <button className={step === "setup" ? "workflow-step active" : "workflow-step"} aria-current={step === "setup" ? "step" : undefined} onClick={() => setStep("setup")}>Financial setup</button>
+      <button className={step === "results" ? "workflow-step active" : "workflow-step"} aria-current={step === "results" ? "step" : undefined} disabled={!source} onClick={() => setStep("results")}>3 · Financial results</button>
+      <button className="workflow-step ml-auto" aria-current={step === "policies" ? "page" : undefined} onClick={() => setStep("policies")}>Policies & history</button>
     </nav>
     <div hidden={step !== "import"}>
       <div className="mb-5"><h1 className="text-3xl font-bold tracking-tight">Start with your MMS workbook.</h1><p className="mt-2 text-sm text-[var(--muted)]">Validation and processing are automatic. Review exceptions, then complete the missing financial inputs.</p></div>
@@ -57,6 +73,6 @@ export function AnalysisWorkspace() {
     <div hidden={step !== "setup"}><FinancialSetupWizard key={setupGeneration} source={source} onMasterChange={setMaster} initialMaster={setupSeed} /></div>
     <div hidden={step !== "results"}><FinancialResults key={`${source?.source.importedAt ?? "none"}:${master.revision}`} source={source} master={master} client={analysisClient} onSetup={() => setStep("setup")} /></div>
     <div hidden={step !== "policies"}><PolicyWorkspace master={master} history={archive.releases} onHistory={setHistory} portability={<ArchiveControls archive={archive} onMerge={mergeArchive} onRestoreMaster={restoreMaster} />} /></div>
-    <footer className="mt-10 border-t border-[var(--line)] py-5 text-xs text-[var(--muted)]">Estimated operational results · Source evidence and missing inputs remain traceable.</footer>
+    <footer className="app-footer mt-12 py-5 text-xs text-[var(--muted)]">© 2026 Data Dribblers. ONYX is a product of Data Dribblers.</footer>
   </main>;
 }

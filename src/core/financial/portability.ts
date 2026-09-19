@@ -28,7 +28,7 @@ export function exportMasterExcel(master: FinancialMaster): ArrayBuffer {
     XLSX.utils.book_append_sheet(book, sheet, name);
   }
   append("Guide", [
-    ["3D Profit Intelligence", "Financial master · schema 1"],
+    ["Onyx", "Financial master · schema 1"],
     ["How to use", "Edit rows below headers. Keep keys and schema metadata unchanged; edit factory, timezone and scope dates in Metadata."],
     ["Unknown values", "Leave blank. Enter numeric zero only when verified. Money is INR; prices exclude GST."],
     ["Dates", "Use YYYY-MM-DD. Effective through is inclusive; blank means open-ended."],

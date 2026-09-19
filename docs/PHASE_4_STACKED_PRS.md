@@ -11,7 +11,7 @@ The project owner authorized one continuous implementation with three **local co
 ## Verify the combined work
 
 ```bash
-cd "/Users/anshumaansharma0404gmail.com/Desktop/3D-Profit-Intelligence"
+cd "/Users/anshumaansharma0404gmail.com/3D-Local/Onyx"
 git switch feat/policy-portability
 git status
 git log --oneline main..HEAD
@@ -49,7 +49,7 @@ git push -u origin feat/policy-portability
 
 ## PR 1 — Phase 4.3
 
-[Create comparison](https://github.com/Anshumaan657/3D-Profit-Intelligence/compare/main...feat/policy-versioning)
+[Create comparison](https://github.com/Anshumaan657/Onyx/compare/main...feat/policy-versioning)
 
 Title: **Phase 4.3 — Immutable financial releases and approvals**
 
@@ -76,7 +76,7 @@ Base **main**, compare **feat/policy-versioning**. Review, wait for CI and use *
 
 ## PR 2 — Phase 4.4
 
-[Initial stacked comparison](https://github.com/Anshumaan657/3D-Profit-Intelligence/compare/feat/policy-versioning...feat/policy-confidence)
+[Initial stacked comparison](https://github.com/Anshumaan657/Onyx/compare/feat/policy-versioning...feat/policy-confidence)
 
 Title: **Phase 4.4 — Evidence confidence and policy review workspace**
 
@@ -103,7 +103,7 @@ Initially base **feat/policy-versioning**, compare **feat/policy-confidence**. *
 
 ## PR 3 — Phase 4.5
 
-[Initial stacked comparison](https://github.com/Anshumaan657/3D-Profit-Intelligence/compare/feat/policy-confidence...feat/policy-portability)
+[Initial stacked comparison](https://github.com/Anshumaan657/Onyx/compare/feat/policy-confidence...feat/policy-portability)
 
 Title: **Phase 4.5 — Policy archive portability and final verification**
 

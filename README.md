@@ -1,8 +1,8 @@
-# 3D Profit Intelligence
+# Onyx
 
 **Factory Profit, Loss and Forecast Dashboard**
 
-3D Profit Intelligence is a local-first web application that will translate MMS production workbooks into traceable operational financial performance for factory owners and business teams.
+Onyx is a local-first web application that translates MMS production workbooks into traceable operational financial performance for factory owners and business teams.
 
 ## Current checkpoint
 

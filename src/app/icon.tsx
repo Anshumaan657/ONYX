@@ -18,14 +18,14 @@ export default function Icon() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 8,
-          background: "#0d9488",
-          color: "white",
+          background: "#FB651E",
+          color: "#000000",
           fontSize: 14,
           fontWeight: 800,
           letterSpacing: "-0.04em",
         }}
       >
-        3D
+        O
       </div>
     ),
     size,

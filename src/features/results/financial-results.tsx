@@ -42,8 +42,9 @@ function Trend({ report, metricKey }: { report: HistoricalFinancialReport; metri
 function MetricCard({ metric, metricKey, report }: { metric: HistoricalMetric; metricKey: HistoricalMetricKey; report: HistoricalFinancialReport }) {
   const [open, setOpen] = useState(false);
   const amount = formatExact(metric.exactValue, metric.unit);
-  return <article className={`result-card ${metric.status}`}>
-    <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-[var(--muted)]">{metric.label}</p><p className="mt-2 text-2xl font-black tracking-[-0.04em]">{metric.status === "partial" ? `${amount} known` : amount}</p></div><span className="result-status">{statusLabel(metric)}</span></div>
+  // TODO(data-owner): investigate anomalous magnitude reports for labour and total operating cost separately from this UI pass.
+  return <article className={`result-card metric-card ${metric.status}`}>
+    <div className="metric-card-header"><div className="metric-card-copy"><p className="metric-label text-sm font-semibold">{metric.label}</p><p className="metric-value mt-2 text-2xl font-black tracking-[-0.04em]">{amount}</p>{metric.status === "partial" ? <p className="metric-qualifier">Known subtotal</p> : null}</div><span className="result-status">{statusLabel(metric)}</span></div>
     <button type="button" aria-expanded={open} className="setup-secondary mt-5 w-full" onClick={() => setOpen(value => !value)}>{open ? "Hide details" : "View details"}</button>
     {open ? <div className="mt-5 border-t border-[var(--line)] pt-5">
       <h3 className="text-sm font-bold">Why this result?</h3><p className="mt-2 text-sm leading-6 text-[var(--muted)]">{metric.explanation}</p>
@@ -59,8 +60,8 @@ function MetricCard({ metric, metricKey, report }: { metric: HistoricalMetric; m
 function AttributionPanel({ report }: { report: HistoricalFinancialReport }) {
   const attribution = buildLossAttribution(report);
   const actionPlan = buildActionPlan(report);
-  const toneClass = attribution.tone === "loss" ? "border-rose-500/30 bg-rose-500/[.06]" : attribution.tone === "profit" ? "border-teal-500/30 bg-teal-500/[.06]" : "border-amber-500/30 bg-amber-500/[.06]";
-  return <details className={`mt-5 rounded-2xl border p-5 ${toneClass}`}>
+  const toneClass = attribution.tone === "loss" ? "unavailable" : attribution.tone === "profit" ? "complete" : "partial";
+  return <details className={`tone-panel ${toneClass} mt-5 p-5`}>
     <summary className="min-h-11 cursor-pointer py-2 font-bold">Why did this period perform this way?</summary>
     <div className="mt-4 border-t border-[var(--line)] pt-4"><h3 className="text-lg font-bold">{attribution.headline}</h3><p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">{attribution.explanation}</p>
       {attribution.drivers.length ? <><h4 className="mt-5 text-sm font-bold">Largest financial drivers</h4><div className="mt-3 grid gap-3 sm:grid-cols-3">{attribution.drivers.map(driver => <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-4" key={driver.key}><p className="text-sm font-bold">{driver.label}</p><p className="mt-1 text-lg font-black">{formatExact(driver.impact, "INR")}</p><p className="setup-help">{driver.explanation}</p><p className="mt-3 text-sm font-semibold">Action: {driver.action}</p></div>)}</div></> : null}
@@ -143,9 +144,9 @@ export function FinancialResults({ source, master, client, onSetup }: { source: 
       <AttributionPanel report={report} />
       <ForecastPanel report={forecast} onRun={() => void runForecast()} busy={forecastBusy} error={forecastError} validation={validation} onValidate={() => void runValidation()} validationBusy={validationBusy} validationError={validationError} />
       <ReportsPanel report={report} forecast={forecast} />
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{primary.filter(key => statusFilter === "all" || report.totals[key].status === statusFilter).map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
-      <h2 className="mt-8 text-xl font-bold">Cost breakdown</h2><div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{costs.filter(key => statusFilter === "all" || report.totals[key].status === statusFilter).map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
-      {report.readiness.missing.length ? <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] p-5"><h2 className="font-bold">Complete the missing financial information</h2><p className="mt-2 text-sm leading-6 text-[var(--muted)]">A known subtotal may be shown, but complete profit stays unavailable until required prices and costs are supplied.</p><button type="button" className="setup-secondary mt-4" onClick={onSetup}>Review financial setup</button></div> : null}
+      <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">{primary.filter(key => statusFilter === "all" || report.totals[key].status === statusFilter).map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
+      <h2 className="mt-8 text-xl font-bold">Cost breakdown</h2><div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">{costs.filter(key => statusFilter === "all" || report.totals[key].status === statusFilter).map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
+      {report.readiness.missing.length ? <div className="tone-panel partial mt-6 p-5"><h2 className="font-bold">Complete the missing financial information</h2><p className="mt-2 text-sm leading-6 text-[var(--muted)]">A known subtotal may be shown, but complete profit stays unavailable until required prices and costs are supplied.</p><button type="button" className="setup-secondary mt-4" onClick={onSetup}>Review financial setup</button></div> : null}
     </>}
   </section>;
 }

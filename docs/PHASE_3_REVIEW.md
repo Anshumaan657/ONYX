@@ -45,7 +45,7 @@ The importer remains in its worker while users move between screens. Financial s
 Run only after review. No direct push to main is needed.
 
 ```bash
-cd "/Users/anshumaansharma0404gmail.com/Desktop/3D-Profit-Intelligence"
+cd "/Users/anshumaansharma0404gmail.com/3D-Local/Onyx"
 git switch feat/financial-master
 git status --short --branch
 npm run lint && npm run typecheck && npm test && npm run build

@@ -43,7 +43,7 @@ yarn-error.log*
 /private-data/
 /normalized-snapshots/
 /financial-drafts/
-3D-Financial-Master_*.json
+Onyx-Financial-Master_*.json
 
 # generated outputs
 /generated-reports/
@@ -58,4 +58,4 @@ next-env.d.ts
 
 # local application state
 /.local-data/
-3D-Policy-Archive*.json
+Onyx-Policy-Archive*.json
