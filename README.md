@@ -1,42 +1,74 @@
 # Onyx
 
-**Factory Profit, Loss and Forecast Dashboard**
+Onyx is a local-first factory profit intelligence platform. It turns MMS production workbooks into explainable operational financial results, forecasts and practical actions.
 
-Onyx is a local-first web application that translates MMS production workbooks into traceable operational financial performance for factory owners and business teams.
+## What Onyx does
 
-## Current checkpoint
+Onyx helps factory teams move from raw production records to a clear financial view:
 
-Phase 3 adds a guided Financial Setup Wizard on top of the verified MMS importer. It collects product prices/material costs, machine and labour rates, overheads, quality/rework costs, scrap recovery, factory calendar rules, unit conversions and aliases. Effective-date and input checks are shared by the UI and Excel/JSON imports. Draft storage is local, optional and consent-based. Financial calculations remain deferred to their reviewed phase.
+1. Upload an MMS `.xls` or `.xlsx` workbook.
+2. Process and validate the workbook locally in the browser.
+3. Review only missing, invalid or conflicting information.
+4. Select a date, date range, product, machine, shift or result status.
+5. View a clean financial summary.
+6. Open explanations, evidence, formulas, trends and actions only when needed.
+7. Generate a transparent 30-day baseline forecast and optionally backtest it.
+8. Export historical and forecast reports locally.
 
-Phase 4 is merged. Phase 5 adds a local historical financial engine and compact date-range results workspace. Complete financial results require complete inputs; otherwise the application shows an explicit known subtotal or unavailable state. Calculations, source evidence and daily trends remain closed until requested.
+## Financial outputs
 
-Phase 3.1 adds an adaptive Data Review step: the workbook is processed first, and users see only missing or conflicting information that may affect results. They can review it or continue with clearly labelled partial results.
+Depending on the available source data and financial setup, Onyx can calculate:
 
-Phase 6 adds a closed-by-default loss/profit attribution panel. It ranks the largest calculated operating-cost drivers and gives a short action; unavailable profit is never explained with a guess.
+- Estimated production value
+- Material cost
+- Machine cost
+- Labour cost
+- Maintenance cost
+- Quality and rework cost
+- Allocated overhead
+- Packaging and transport cost
+- Total operating cost
+- Estimated operating profit
+- Profit margin
 
-Phase 7 adds a closed-by-default profit opportunities panel. It uses exact calculated cost drivers to suggest short, practical improvement actions without promising savings or inventing missing data.
+Every result is labelled as complete, partial or unavailable. Missing information is never silently treated as zero.
 
-The 30-day forecast baseline is now available after historical calculation. It uses the last 30 daily values, shows confidence and assumptions, and keeps any metric with missing source data unavailable.
+## Forecasting
 
-Phase 8 adds unified, collapsed filters for date range, product, machine, shift and result status. The same data selection is used by historical calculations, explanations, trends and forecasts.
+The current forecast is a transparent statistical baseline, not an ML model. It is called `recent-daily-average-v1` and uses up to the most recent 30 daily values in the selected historical report. Those averages are projected across the next 30 calendar days.
 
-Phase 9 adds an owner-focused snapshot above the financial cards. It surfaces the period state, readiness and usable-record coverage without duplicating the metric values or opening detail panels automatically.
+The forecast clearly displays its assumptions and confidence. It does not invent future prices, costs, staffing, demand or shutdowns.
 
-Phase 10 adds a collapsed Reports & exports panel for filtered historical CSV, forecast CSV, JSON report bundles and print-ready reports. Exports are generated locally and preserve statuses, assumptions and unavailable values.
+An optional 30-day backtest is available when at least 60 calendar days are available:
 
-Phase 13 adds an optional local 30-day rolling back-test for the forecast. It reports MAE, MAPE and a confidence level only when at least 60 days of workbook history are available.
+- 30 days are used for training
+- The following 30 days are used for evaluation
+- MAE and MAPE are reported per financial metric
+- Confidence is high at MAPE ≤ 10%, medium at MAPE ≤ 25%, and low above 25%
 
-Phase 14 adds closed-by-default action recommendations. A user can open a period explanation to see evidence-based “Maximize the profit” or “Minimize the loss” actions, while incomplete results point back to missing inputs without guessing.
+Accuracy must be measured against the specific factory workbook. The baseline does not guarantee future financial performance.
 
-Phase 15 is the final product-verification pass. It checks the complete upload-to-recommendation workflow, partial and unavailable states, accessibility, data-safety boundaries and production readiness without changing financial formulas.
+## Data safety
 
-## Financial integrity rules
+Onyx is local-first by default:
 
-- Actual accounting results, estimated operational results and opportunity losses remain separate.
-- Missing mandatory amounts are never silently replaced with zero.
-- Opportunity losses are not automatically deducted from operating profit.
-- Every future amount must retain source evidence and its financial-policy version.
-- Provisional formulas must remain configurable and visibly provisional.
+- Workbooks are processed in the browser.
+- Raw workbooks are not uploaded by the application.
+- Source rows and calculation evidence remain traceable.
+- Missing or conflicting inputs are surfaced instead of hidden.
+- Local draft and policy storage require user consent.
+- Do not commit workbooks, generated reports, screenshots containing factory data or secrets.
+
+## Technology
+
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- Vitest and Testing Library
+- XLSX workbook parsing
+- Zod validation
+- Web Workers for heavier import and calculation work
 
 ## Local development
 
@@ -45,57 +77,83 @@ Requirements:
 - Node.js 22 LTS (`>=22.13.0`)
 - npm
 
-Install and validate:
+Install dependencies:
 
 ```bash
 npm ci
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Run the verification suite:
+
+```bash
 npm run lint
 npm run typecheck
 npm test
 npm run build
 ```
 
-Start the local application:
+When the local environment prevents Turbopack from binding its internal process, the production build can be verified with:
 
 ```bash
-npm run dev
+npx next build --webpack
 ```
 
-## Data safety
+## Repository structure
 
-Do not add client workbooks, normalized snapshots, generated reports, secrets or screenshots containing factory information to this repository. The relevant paths and spreadsheet extensions are excluded through `.gitignore`.
-
-The importer does not upload or modify the selected workbook. It rejects unsupported formats, unsafe sizes, mismatched file signatures, missing structural requirements and imports with more than 25% invalid core rows.
+```text
+.
+├── docs/                    # Architecture, security and phase reviews
+├── src/
+│   ├── app/                 # Next.js entry points and global styles
+│   ├── core/                # Import, financial, policy, forecast and report logic
+│   ├── features/            # User-facing workflow and dashboard components
+│   └── workers/             # Browser workers for import and analysis
+├── vendor/                  # Vendored XLSX package
+├── LICENSE
+├── package.json
+├── next.config.ts
+└── vitest.config.mts
+```
 
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Development workflow](docs/DEVELOPMENT.md)
 - [Excel input guide](docs/EXCEL_INPUT_GUIDE.md)
 - [Financial setup guide](docs/FINANCIAL_SETUP.md)
-- [Phase 3 verification and review](docs/PHASE_3_REVIEW.md)
-- [Phase 3.1 adaptive data review](docs/PHASE_3_1_REVIEW.md)
-- [Phase 4 subphase plan and GitHub workflow](docs/PHASE_4_PLAN.md)
-- [Phase 4.1 verification and review](docs/PHASE_4_1_REVIEW.md)
-- [Formula definitions and execution boundaries](docs/FORMULA_REFERENCE.md)
-- [Phase 4.2 verification and GitHub PR workflow](docs/PHASE_4_2_REVIEW.md)
-- [Immutable releases and approval boundaries](docs/PHASE_4_3_REVIEW.md)
-- [Confidence and policy workspace](docs/PHASE_4_4_REVIEW.md)
-- [Archive portability and final verification](docs/PHASE_4_5_REVIEW.md)
-- [Three-PR GitHub handoff](docs/PHASE_4_STACKED_PRS.md)
-- [Phase 5 verification and review](docs/PHASE_5_REVIEW.md)
-- [Phase 6 verification and review](docs/PHASE_6_REVIEW.md)
-- [Phase 7 verification and review](docs/PHASE_7_REVIEW.md)
-- [30-day forecast baseline](docs/PHASE_11_12_FORECAST_REVIEW.md)
-- [Phase 8 unified filters](docs/PHASE_8_REVIEW.md)
-- [Phase 9 owner dashboard](docs/PHASE_9_REVIEW.md)
-- [Phase 10 reports and exports](docs/PHASE_10_REVIEW.md)
-- [Phase 13 forecast validation](docs/PHASE_13_REVIEW.md)
-- [Phase 14 action recommendations](docs/PHASE_14_REVIEW.md)
-- [Phase 15 final verification](docs/PHASE_15_REVIEW.md)
-- [Development workflow](docs/DEVELOPMENT.md)
+- [Formula reference](docs/FORMULA_REFERENCE.md)
 - [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
 - [Decision status](docs/DECISION_STATUS.md)
+- [Phase 3 review](docs/PHASE_3_REVIEW.md)
+- [Adaptive data review](docs/PHASE_3_1_REVIEW.md)
+- [Phase 4 plan](docs/PHASE_4_PLAN.md)
+- [Phase 4.1 review](docs/PHASE_4_1_REVIEW.md)
+- [Phase 4.2 review](docs/PHASE_4_2_REVIEW.md)
+- [Phase 4.3 review](docs/PHASE_4_3_REVIEW.md)
+- [Phase 4.4 review](docs/PHASE_4_4_REVIEW.md)
+- [Phase 4.5 review](docs/PHASE_4_5_REVIEW.md)
+- [Phase 4 stacked PR workflow](docs/PHASE_4_STACKED_PRS.md)
+- [Phase 5 review](docs/PHASE_5_REVIEW.md)
+- [Phase 6 review](docs/PHASE_6_REVIEW.md)
+- [Phase 7 review](docs/PHASE_7_REVIEW.md)
+- [Forecast baseline](docs/PHASE_11_12_FORECAST_REVIEW.md)
+- [Phase 8 review](docs/PHASE_8_REVIEW.md)
+- [Phase 9 review](docs/PHASE_9_REVIEW.md)
+- [Phase 10 review](docs/PHASE_10_REVIEW.md)
+- [Phase 13 review](docs/PHASE_13_REVIEW.md)
+- [Phase 14 review](docs/PHASE_14_REVIEW.md)
+- [Phase 15 review](docs/PHASE_15_REVIEW.md)
 
 ## Project status
 
-This repository is proprietary and has no public license. Do not publish, commit or push changes without explicit phase authorization.
+Onyx is an actively developed, phased implementation. Financial calculations, source evidence, policy versions, forecast assumptions and unavailable states are intentionally kept visible so results can be reviewed before operational use.
+
+## License
+
+Onyx is released under the [MIT License](LICENSE).
