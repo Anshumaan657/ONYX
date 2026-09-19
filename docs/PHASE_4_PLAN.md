@@ -38,7 +38,7 @@ Confidence rules describe conditions and an unavailable/cap effect. Scores are e
 Phase 4.1 branch: `feat/policy-foundation`. Review all changes before staging. Do not include client data, exports or secrets.
 
 ```bash
-cd "/Users/anshumaansharma0404gmail.com/Desktop/3D-Profit-Intelligence"
+cd "/Users/anshumaansharma0404gmail.com/3D-Local/Onyx"
 git switch feat/policy-foundation
 git status --short
 npm run lint
@@ -55,7 +55,7 @@ git push -u origin feat/policy-foundation
 
 Only commit/push after the checks pass and the staged changes match your review.
 
-Open [the GitHub comparison](https://github.com/Anshumaan657/3D-Profit-Intelligence/compare/main...feat/policy-foundation). Set **base: main**, **compare: feat/policy-foundation**. Create the PR with title **Phase 4.1 — Financial policy foundation**, review **Files changed**, and wait for CI checks to pass. Use **Create a merge commit → Merge pull request → Confirm merge** on the website. No CLI merge or direct push to main is required.
+Open [the GitHub comparison](https://github.com/Anshumaan657/Onyx/compare/main...feat/policy-foundation). Set **base: main**, **compare: feat/policy-foundation**. Create the PR with title **Phase 4.1 — Financial policy foundation**, review **Files changed**, and wait for CI checks to pass. Use **Create a merge commit → Merge pull request → Confirm merge** on the website. No CLI merge or direct push to main is required.
 
 After GitHub confirms the merge:
 

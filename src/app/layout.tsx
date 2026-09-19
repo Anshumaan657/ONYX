@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  applicationName: "3D Profit Intelligence",
+  applicationName: "Onyx",
   title: {
-    default: "3D Profit Intelligence",
-    template: "%s | 3D Profit Intelligence",
+    default: "Onyx",
+    template: "%s | Onyx",
   },
   description:
     "A privacy-first factory profit, loss and forecast dashboard for operational financial performance.",

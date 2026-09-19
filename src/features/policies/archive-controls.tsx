@@ -69,7 +69,7 @@ export function ArchiveControls({ archive, onMerge, onRestoreMaster }: { archive
     setBusy(true);
     try {
       const raw = await exportArchive(archive); const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
-      const link = document.createElement("a"); link.href = url; link.download = "3D-Policy-Archive.json"; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const link = document.createElement("a"); link.href = url; link.download = "Onyx-Policy-Archive.json"; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
       setNotice("Archive exported. It contains sensitive financial snapshots and evidence; store it securely.");
     } catch { setNotice("Export failed. Current history remains in memory."); }
     finally { setBusy(false); }

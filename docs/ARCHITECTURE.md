@@ -2,7 +2,7 @@
 
 ## Direction
 
-3D Profit Intelligence uses Next.js 16 App Router, React 19, TypeScript and Tailwind CSS. Historical workbook processing, filtering and exports are intended to remain client-side by default.
+Onyx uses Next.js 16 App Router, React 19, TypeScript and Tailwind CSS. Historical workbook processing, filtering and exports are intended to remain client-side by default.
 
 The user interface must depend on typed calculation results. Calculation engines must never depend on React components.
 
