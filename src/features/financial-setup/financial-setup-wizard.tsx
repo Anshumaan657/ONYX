@@ -72,7 +72,7 @@ export function FinancialSetupWizard({ source, onMasterChange, initialMaster }: 
 
   return <section aria-labelledby="setup-title">
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div><p className="text-xs font-bold uppercase tracking-[.15em] text-[var(--brand)]">Phase 3 · Financial master</p><h1 id="setup-title" className="mt-2 text-3xl font-bold tracking-tight">Set up your financial inputs.</h1><p className="mt-2 text-sm text-[var(--muted)]">Fill what you know. Keep unknown amounts blank. You can return to any section.</p></div>
+      <div><p className="text-xs font-bold uppercase tracking-[.15em] text-[var(--brand)]">Financial setup</p><h1 id="setup-title" className="mt-2 text-3xl font-bold tracking-tight">Set up your financial inputs.</h1><p className="mt-2 text-sm text-[var(--muted)]">Fill what you know. Keep unknown amounts blank. You can return to any section.</p></div>
       <span className="rounded-full border border-[var(--line)] px-3 py-2 text-xs">Draft revision {master.revision} · INR</span>
     </div>
     <div className="grid gap-5 lg:grid-cols-[210px_minmax(0,1fr)]">
