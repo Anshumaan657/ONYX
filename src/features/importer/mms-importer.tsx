@@ -417,14 +417,14 @@ export function MmsImporter({ onReady, onContinue, onReset }: { onReady?: (summa
           <div className="mt-5 flex flex-wrap gap-3 print:hidden">
             {onContinue ? <button className="setup-button" onClick={onContinue} type="button">Review data and continue →</button> : null}
             <button
-              className="rounded-xl bg-[var(--panel)] px-4 py-2.5 text-sm font-bold text-white"
+              className="setup-secondary"
               onClick={downloadReport}
               type="button"
             >
-              Download JSON report
+              Download JSON
             </button>
             <button
-              className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm font-bold"
+              className="setup-secondary"
               onClick={() => window.print()}
               type="button"
             >

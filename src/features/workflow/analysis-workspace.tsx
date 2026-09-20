@@ -60,8 +60,8 @@ export function AnalysisWorkspace() {
     <nav className="workflow-nav my-6 flex flex-wrap gap-2" aria-label="Analysis workflow">
       <button className={step === "import" ? "workflow-step active" : "workflow-step"} aria-current={step === "import" ? "step" : undefined} onClick={() => setStep("import")}>1 · Import data{source ? " ✓" : ""}</button>
       <button className={step === "review" ? "workflow-step active" : "workflow-step"} aria-current={step === "review" ? "step" : undefined} disabled={!source} onClick={() => setStep("review")}>2 · Data review</button>
-      <button className={step === "setup" ? "workflow-step active" : "workflow-step"} aria-current={step === "setup" ? "step" : undefined} onClick={() => setStep("setup")}>Financial setup</button>
-      <button className={step === "results" ? "workflow-step active" : "workflow-step"} aria-current={step === "results" ? "step" : undefined} disabled={!source} onClick={() => setStep("results")}>3 · Financial results</button>
+      <button className={step === "setup" ? "workflow-step active" : "workflow-step"} aria-label="Financial setup" aria-current={step === "setup" ? "step" : undefined} onClick={() => setStep("setup")}>3 · Financial setup</button>
+      <button className={step === "results" ? "workflow-step active" : "workflow-step"} aria-current={step === "results" ? "step" : undefined} disabled={!source} onClick={() => setStep("results")}>4 · Financial results</button>
       <button className="workflow-step ml-auto" aria-current={step === "policies" ? "page" : undefined} onClick={() => setStep("policies")}>Policies & history</button>
     </nav>
     <div hidden={step !== "import"}>
