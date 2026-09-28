@@ -34,4 +34,10 @@ describe("workbook-only metrics", () => {
     expect(report.sourceRows).toBe(1);
     expect(report.totals.reportedProduction.value).toBe(100);
   });
+
+  it("returns sorted daily points for trend views", () => {
+    const report = calculateWorkbookMetrics(source([production({ businessDate: "2023-08-19", sourceRow: 8 }), production({ businessDate: "2023-08-18", sourceRow: 7 })]), "2023-08-18", "2023-08-19");
+    expect(report.daily.map(point => point.date)).toEqual(["2023-08-18", "2023-08-19"]);
+    expect(report.daily[0].accepted).toBe(92);
+  });
 });
