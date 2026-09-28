@@ -151,6 +151,7 @@ npx next build --webpack
 - [Phase 15 review](docs/PHASE_15_REVIEW.md)
 - [Phase 1 review](docs/PHASE_1_REVIEW.md)
 - [Phase 2 review](docs/PHASE_2_REVIEW.md)
+- [Phase 3 workbook analytics review](docs/PHASE_3_WORKBOOK_ANALYTICS_REVIEW.md)
 
 ## Project status
 
