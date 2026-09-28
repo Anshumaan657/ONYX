@@ -46,6 +46,14 @@ See `PHASE_3_WORKBOOK_ANALYTICS_REVIEW.md`.
 
 See `PHASE_4_WORKBOOK_TRENDS_REVIEW.md`.
 
+## Implemented for Phase 5 workbook baseline review
+
+- A workbook-only `recent-daily-average-v1` baseline projects operational quantities over the next 30 days.
+- Confidence and history length are displayed with explicit assumptions.
+- Missing quantities remain unavailable; no future prices, orders, staffing or cost changes are invented.
+
+See `PHASE_5_WORKBOOK_BASELINE_REVIEW.md`.
+
 ## Implemented for Phase 2 review
 
 - Local `.xls` and `.xlsx` MMS workbook processing
