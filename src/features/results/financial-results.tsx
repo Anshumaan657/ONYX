@@ -9,6 +9,7 @@ import { exact } from "@/core/policy/exact";
 import { OwnerDashboard } from "@/features/dashboard/owner-dashboard";
 import { forecastCsv, historicalCsv, reportJson } from "@/core/reports";
 import { buildActionPlan } from "@/core/recommendations";
+import type { WorkbookMetric, WorkbookMetricsReport } from "@/core/workbook";
 
 const primary: HistoricalMetricKey[] = ["productionValue", "totalOperatingCost", "operatingProfit", "profitMargin"];
 const costs: HistoricalMetricKey[] = ["materialCost", "machineCost", "labourCost", "maintenanceCost", "qualityCost", "allocatedOverhead", "otherDirectCost"];
@@ -18,6 +19,21 @@ function statusLabel(metric: HistoricalMetric): string {
   if (metric.status === "available") return "Complete";
   if (metric.status === "partial") return "Partial — known subtotal";
   return "Unavailable";
+}
+
+function workbookValue(metric: WorkbookMetric): string {
+  if (metric.value === null) return "Unavailable";
+  if (metric.unit === "INR") return `₹${metric.value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return metric.value.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+}
+
+function WorkbookMetricCard({ metric }: { metric: WorkbookMetric }) {
+  return <article className={`result-card metric-card ${metric.status}`}><div className="metric-card-header"><div className="metric-card-copy"><p className="metric-label text-sm font-semibold">{metric.label}</p><p className="metric-value mt-2 text-2xl font-black tracking-[-0.04em]">{workbookValue(metric)}{metric.unit === "hours" ? " h" : ""}</p></div><span className="result-status">{metric.status === "available" ? "Workbook" : metric.status === "partial" ? "Partial" : "Unavailable"}</span></div><p className="mt-3 text-sm leading-6 text-[var(--muted)]">{metric.explanation}</p></article>;
+}
+
+function WorkbookSignals({ report }: { report: WorkbookMetricsReport }) {
+  const keys = ["reportedProduction", "acceptedProduction", "rejectedQuantity", "reworkedQuantity", "operativeHours", "downtimeHours", "componentCost", "machineCost", "labourCost", "costPerReportedUnit"] as const;
+  return <section className="mt-6" aria-labelledby="workbook-signals-title"><div className="mb-4"><p className="text-xs font-bold uppercase tracking-[.15em] text-[var(--brand)]">Workbook-only signals</p><h2 id="workbook-signals-title" className="mt-2 text-xl font-bold">What the MMS data directly shows</h2><p className="mt-1 text-sm text-[var(--muted)]">These are operational values read from the workbook, not accounting profit. Missing source fields remain unavailable.</p></div><div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">{keys.map(key => <WorkbookMetricCard key={key} metric={report.totals[key]} />)}</div>{report.warnings.length ? <p className="setup-help mt-3">{report.warnings.join(" ")}</p> : null}</section>;
 }
 
 function Trend({ report, metricKey }: { report: HistoricalFinancialReport; metricKey: HistoricalMetricKey }) {
@@ -102,13 +118,15 @@ export function FinancialResults({ source, master, client, onSetup }: { source: 
   const [validation, setValidation] = useState<ForecastValidationReport | null>(null);
   const [validationBusy, setValidationBusy] = useState(false);
   const [validationError, setValidationError] = useState("");
+  const [workbookReport, setWorkbookReport] = useState<WorkbookMetricsReport | null>(null);
+  const [workbookError, setWorkbookError] = useState("");
   const [product, setProduct] = useState("");
   const [machine, setMachine] = useState("");
   const [shift, setShift] = useState("");
   const [statusFilter, setStatusFilter] = useState<ResultStatusFilter>("all");
   const rangeInvalid = !available || !from || !through || from > through || (available ? from < available[0] || through > available[1] : true);
   const filters = useMemo(() => ({ ...(product ? { product } : {}), ...(machine ? { machine } : {}), ...(shift ? { shift } : {}) }), [machine, product, shift]);
-  function clearResults() { setReport(null); setForecast(null); setValidation(null); setError(""); setForecastError(""); setValidationError(""); }
+  function clearResults() { setReport(null); setWorkbookReport(null); setForecast(null); setValidation(null); setError(""); setWorkbookError(""); setForecastError(""); setValidationError(""); }
   const run = useCallback(async () => {
     if (!client || rangeInvalid) return;
     setBusy(true); setError("");
@@ -116,11 +134,21 @@ export function FinancialResults({ source, master, client, onSetup }: { source: 
     catch (reason) { setError(reason instanceof Error ? reason.message : "Financial analysis could not be completed."); }
     finally { setBusy(false); }
   }, [client, filters, from, master, rangeInvalid, through]);
+  const runWorkbookMetrics = useCallback(async () => {
+    if (!client?.workbook || rangeInvalid) return;
+    try { setWorkbookReport(await client.workbook({ master, from, through, filters })); setWorkbookError(""); }
+    catch (reason) { setWorkbookError(reason instanceof Error ? reason.message : "Workbook signals could not be calculated."); }
+  }, [client, filters, from, master, rangeInvalid, through]);
   useEffect(() => {
     if (!client || rangeInvalid) return;
     const timer = window.setTimeout(() => void run(), 0);
     return () => window.clearTimeout(timer);
   }, [client, rangeInvalid, run]);
+  useEffect(() => {
+    if (!client?.workbook || rangeInvalid) return;
+    const timer = window.setTimeout(() => void runWorkbookMetrics(), 0);
+    return () => window.clearTimeout(timer);
+  }, [client, rangeInvalid, runWorkbookMetrics]);
   async function runForecast() {
     if (!client?.forecast || rangeInvalid) return;
     setForecastBusy(true); setForecastError("");
@@ -145,6 +173,7 @@ export function FinancialResults({ source, master, client, onSetup }: { source: 
     {!report ? <div className="mt-5 rounded-2xl border border-dashed border-[var(--line)] p-8 text-center"><p className="font-semibold">Your financial summary will appear here.</p><p className="setup-help">Unknown prices and costs will remain unavailable, never zero.</p></div> : <>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-xl font-bold">Financial overview</h2><p className="setup-help">{period} · {report.readiness.usableProductionRows.toLocaleString("en-IN")} usable production records</p></div><span className={`readiness ${report.readiness.status}`}>{report.readiness.status === "ready" ? "Complete calculation" : report.readiness.status === "partial" ? "Partial calculation" : "Financial inputs required"}</span></div>
       <OwnerDashboard report={report} />
+      {workbookReport ? <WorkbookSignals report={workbookReport} /> : workbookError ? <p role="alert" className="setup-findings mt-5">{workbookError}</p> : null}
       <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">{primary.filter(key => statusFilter === "all" || report.totals[key].status === statusFilter).map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
       <h2 className="mt-8 text-xl font-bold">Cost breakdown</h2><div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">{costs.filter(key => statusFilter === "all" || report.totals[key].status === statusFilter).map(key => <MetricCard key={key} metricKey={key} metric={report.totals[key]} report={report} />)}</div>
       <ForecastPanel report={forecast} onRun={() => void runForecast()} busy={forecastBusy} error={forecastError} validation={validation} onValidate={() => void runValidation()} validationBusy={validationBusy} validationError={validationError} />

@@ -10,12 +10,13 @@ import type {
   MmsImportWorkerResponse,
 } from "@/core/mms";
 import { calculateHistoricalFinancials } from "@/core/historical";
-import type { ForecastValidationWorkerRequest, ForecastValidationWorkerResponse, ForecastWorkerRequest, ForecastWorkerResponse, HistoricalWorkerRequest, HistoricalWorkerResponse } from "@/core/historical";
+import type { ForecastValidationWorkerRequest, ForecastValidationWorkerResponse, ForecastWorkerRequest, ForecastWorkerResponse, HistoricalWorkerRequest, HistoricalWorkerResponse, WorkbookMetricsWorkerRequest, WorkbookMetricsWorkerResponse } from "@/core/historical";
 import { forecastHistorical, validateForecast } from "@/core/forecast";
+import { calculateWorkbookMetrics } from "@/core/workbook";
 
 let activeImport: CanonicalMmsImport | null = null;
 
-function respond(response: MmsImportWorkerResponse | HistoricalWorkerResponse | ForecastWorkerResponse | ForecastValidationWorkerResponse): void {
+function respond(response: MmsImportWorkerResponse | HistoricalWorkerResponse | ForecastWorkerResponse | ForecastValidationWorkerResponse | WorkbookMetricsWorkerResponse): void {
   self.postMessage(response);
 }
 
@@ -34,8 +35,14 @@ function progress(
 
 self.addEventListener(
   "message",
-  (event: MessageEvent<MmsImportWorkerRequest | HistoricalWorkerRequest | ForecastWorkerRequest | ForecastValidationWorkerRequest>) => {
+  (event: MessageEvent<MmsImportWorkerRequest | HistoricalWorkerRequest | ForecastWorkerRequest | ForecastValidationWorkerRequest | WorkbookMetricsWorkerRequest>) => {
     const request = event.data;
+    if (request.type === "workbook_metrics") {
+      if (!activeImport) { respond({ type: "workbook_metrics_failure", requestId: request.requestId, message: "Import the MMS workbook before reading workbook metrics." }); return; }
+      try { respond({ type: "workbook_metrics_success", requestId: request.requestId, report: calculateWorkbookMetrics(activeImport, request.request.from, request.request.through, request.request.filters) }); }
+      catch (error) { respond({ type: "workbook_metrics_failure", requestId: request.requestId, message: error instanceof Error ? error.message : "Workbook metrics could not be calculated." }); }
+      return;
+    }
     if (request.type === "forecast_validation") {
       if (!activeImport) { respond({ type: "forecast_validation_failure", requestId: request.requestId, message: "Import the MMS workbook before validating a forecast." }); return; }
       try { respond({ type: "forecast_validation_success", requestId: request.requestId, report: validateForecast(activeImport, request.request.master, request.request.from, request.request.through, request.request.filters) }); }

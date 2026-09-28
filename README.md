@@ -150,6 +150,7 @@ npx next build --webpack
 - [Phase 14 review](docs/PHASE_14_REVIEW.md)
 - [Phase 15 review](docs/PHASE_15_REVIEW.md)
 - [Phase 1 review](docs/PHASE_1_REVIEW.md)
+- [Phase 2 review](docs/PHASE_2_REVIEW.md)
 
 ## Project status
 
