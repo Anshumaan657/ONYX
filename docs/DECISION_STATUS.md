@@ -54,6 +54,15 @@ See `PHASE_4_WORKBOOK_TRENDS_REVIEW.md`.
 
 See `PHASE_5_WORKBOOK_BASELINE_REVIEW.md`.
 
+## Implemented for Phases 6–7 final review
+
+- Workbook signals now have short explanations and targeted next actions.
+- Evidence remains opt-in through the details panel to avoid dashboard clutter.
+- Release checks expose source-row, negative-value, missing-field and baseline-history concerns.
+- Full lint, typecheck, test and production-build verification completed.
+
+See `PHASE_6_7_FINAL_REVIEW.md`.
+
 ## Implemented for Phase 2 review
 
 - Local `.xls` and `.xlsx` MMS workbook processing
