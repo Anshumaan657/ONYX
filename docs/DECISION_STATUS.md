@@ -38,6 +38,14 @@ See `PHASE_2_REVIEW.md`.
 
 See `PHASE_3_WORKBOOK_ANALYTICS_REVIEW.md`.
 
+## Implemented for Phase 4 workbook trends review
+
+- Daily workbook production, quality and downtime values are available in a closed-by-default trend view.
+- The chart includes a table for exact date-level values and remains accessible without relying on colour.
+- Existing date, machine, shift and product filters are applied before trend aggregation.
+
+See `PHASE_4_WORKBOOK_TRENDS_REVIEW.md`.
+
 ## Implemented for Phase 2 review
 
 - Local `.xls` and `.xlsx` MMS workbook processing
