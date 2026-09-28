@@ -29,6 +29,15 @@ See `PHASE_1_REVIEW.md`.
 
 See `PHASE_2_REVIEW.md`.
 
+## Implemented for Phase 3 workbook analytics review
+
+- Workbook-only quality, utilization and target-achievement KPIs are shown separately from financial results.
+- Users can open breakdowns by machine, product, shift, operator and downtime reason.
+- Existing date and entity filters apply consistently to these comparisons.
+- Breakdown details remain opt-in so the initial dashboard stays uncluttered.
+
+See `PHASE_3_WORKBOOK_ANALYTICS_REVIEW.md`.
+
 ## Implemented for Phase 2 review
 
 - Local `.xls` and `.xlsx` MMS workbook processing
