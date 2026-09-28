@@ -1,6 +1,10 @@
 export { calculateWorkbookMetrics } from "./metrics";
 export { buildWorkbookBreakdowns, buildWorkbookKpis } from "./breakdowns";
 export { forecastWorkbookBaseline } from "./baseline";
+export { buildWorkbookActionPlan } from "./actions";
+export { buildWorkbookReleaseChecks } from "./release-checks";
 export type { WorkbookBaselineForecast, WorkbookBaselineMetric } from "./baseline";
+export type { WorkbookActionPlan } from "./actions";
+export type { WorkbookReleaseCheck } from "./release-checks";
 export type { WorkbookDailyPoint, WorkbookMetric, WorkbookMetricKey, WorkbookMetricsReport, WorkbookMetricStatus } from "./metrics";
 export type { WorkbookBreakdownDimension, WorkbookBreakdownGroup, WorkbookBreakdowns, WorkbookKpis } from "./breakdowns";
