@@ -22,6 +22,15 @@ See `PHASE_1_REVIEW.md`.
 
 ## Implemented for Phase 2 review
 
+- Workbook-only production, quality, time and directly recorded cost signals are calculated in the import worker.
+- Machine, shift, product and result-status filters remain available without requiring financial setup.
+- Missing workbook fields remain partial or unavailable and are never silently converted to zero.
+- Workbook-only values are labelled as operational signals and remain separate from accounting-style profit calculations.
+
+See `PHASE_2_REVIEW.md`.
+
+## Implemented for Phase 2 review
+
 - Local `.xls` and `.xlsx` MMS workbook processing
 - Extension, MIME type, signature, size and schema validation
 - Required `Product Log Book` and `Down Time Details` contract with aliases

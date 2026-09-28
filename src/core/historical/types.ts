@@ -1,5 +1,6 @@
 import type { FinancialMaster } from "../financial/schema";
 import type { ExactValue } from "../policy/exact";
+import type { WorkbookMetricsReport } from "../workbook";
 
 export const HISTORICAL_METRIC_KEYS = [
   "productionValue",
@@ -72,6 +73,7 @@ export type HistoricalFilters = {
 
 export type HistoricalAnalysisClient = {
   analyze: (request: HistoricalAnalysisRequest) => Promise<HistoricalFinancialReport>;
+  workbook?: (request: HistoricalAnalysisRequest) => Promise<WorkbookMetricsReport>;
   forecast?: (request: HistoricalAnalysisRequest) => Promise<import("../forecast/types").ForecastReport>;
   validateForecast?: (request: HistoricalAnalysisRequest) => Promise<import("../forecast/validation").ForecastValidationReport>;
 };
@@ -84,6 +86,10 @@ export type ForecastValidationWorkerRequest = { type: "forecast_validation"; req
 export type ForecastValidationWorkerResponse =
   | { type: "forecast_validation_success"; requestId: string; report: import("../forecast/validation").ForecastValidationReport }
   | { type: "forecast_validation_failure"; requestId: string; message: string };
+export type WorkbookMetricsWorkerRequest = { type: "workbook_metrics"; requestId: string; request: HistoricalAnalysisRequest };
+export type WorkbookMetricsWorkerResponse =
+  | { type: "workbook_metrics_success"; requestId: string; report: WorkbookMetricsReport }
+  | { type: "workbook_metrics_failure"; requestId: string; message: string };
 
 export type HistoricalWorkerRequest = {
   type: "analyze";
