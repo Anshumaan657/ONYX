@@ -12,16 +12,18 @@ const report: HistoricalFinancialReport = { schemaVersion: 1, engineVersion: "1.
 const summary = { dateRange: ["2026-01-01", "2026-01-02"], source: { fileName: "sample.xlsx" } } as unknown as MmsImportSummary;
 
 describe("financial results", () => {
-  it("keeps explanations and trends hidden until the user asks", async () => {
+  it("analyses automatically while keeping explanations and formulas hidden", async () => {
     const analyze = vi.fn().mockResolvedValue(report);
     render(<FinancialResults source={summary} master={emptyMaster()} client={{ analyze }} onSetup={() => undefined} />);
     expect(screen.queryByText("Why this result?")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Calculate results" }));
     await waitFor(() => expect(analyze).toHaveBeenCalled());
     expect(screen.getByText("Financial overview")).toBeInTheDocument();
+    expect(screen.getByLabelText("Machine")).toBeInTheDocument();
     expect(screen.queryByText("Why this result?")).not.toBeInTheDocument();
+    expect(screen.queryByText("Verified formula")).not.toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: "View details" })[0]);
     expect(screen.getByText("Why this result?")).toBeInTheDocument();
+    expect(screen.queryByText("Verified formula")).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: /daily trend/i })).toBeInTheDocument();
   });
 });

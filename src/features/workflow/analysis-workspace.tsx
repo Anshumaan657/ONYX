@@ -50,7 +50,7 @@ export function AnalysisWorkspace() {
     document.documentElement.dataset.theme = next;
     window.localStorage.setItem("onyx-theme", next);
   }
-  function imported(summary: MmsImportSummary, client: HistoricalAnalysisClient) { setSource(summary); setAnalysisClient(client); setStep("review"); }
+  function imported(summary: MmsImportSummary, client: HistoricalAnalysisClient) { setSource(summary); setAnalysisClient(client); setStep("results"); }
   function resetSource() { setSource(null); setAnalysisClient(null); setStep("import"); }
   return <main className="app-shell mx-auto min-h-screen w-full max-w-[1440px] px-[clamp(24px,4vw,64px)] py-5">
     <header className="app-header flex flex-wrap items-center justify-between gap-4">
@@ -65,7 +65,7 @@ export function AnalysisWorkspace() {
       <button className="workflow-step ml-auto" aria-current={step === "policies" ? "page" : undefined} onClick={() => setStep("policies")}>Policies & history</button>
     </nav>
     <div hidden={step !== "import"}>
-      <div className="mb-5"><h1 className="text-3xl font-bold tracking-tight">Start with your MMS workbook.</h1><p className="mt-2 text-sm text-[var(--muted)]">Validation and processing are automatic. Review exceptions, then complete the missing financial inputs.</p></div>
+      <div className="mb-5"><h1 className="text-3xl font-bold tracking-tight">Start with your MMS workbook.</h1><p className="mt-2 text-sm text-[var(--muted)]">Validation and processing are automatic. Upload once to see every available workbook-only result immediately.</p></div>
       <MmsImporter onReady={imported} onReset={resetSource} onContinue={() => setStep("review")} />
       <p className="setup-help mt-4">Reported Qty is authoritative. Stroke × multiplier is a validation check, never a replacement.</p>
     </div>

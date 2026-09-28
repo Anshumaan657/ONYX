@@ -8,9 +8,9 @@ Onyx helps factory teams move from raw production records to a clear financial v
 
 1. Upload an MMS `.xls` or `.xlsx` workbook.
 2. Process and validate the workbook locally in the browser.
-3. Review only missing, invalid or conflicting information.
-4. Select a date, date range, product, machine, shift or result status.
-5. View a clean financial summary.
+3. See the available workbook-only financial summary immediately.
+4. Review only missing, invalid or conflicting information when needed.
+5. Select a date, date range, product, machine, shift or result status.
 6. Open explanations, evidence, formulas, trends and actions only when needed.
 7. Generate a transparent 30-day baseline forecast and optionally backtest it.
 8. Export historical and forecast reports locally.
@@ -149,6 +149,7 @@ npx next build --webpack
 - [Phase 13 review](docs/PHASE_13_REVIEW.md)
 - [Phase 14 review](docs/PHASE_14_REVIEW.md)
 - [Phase 15 review](docs/PHASE_15_REVIEW.md)
+- [Phase 1 review](docs/PHASE_1_REVIEW.md)
 
 ## Project status
 
