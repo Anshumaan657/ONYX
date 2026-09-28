@@ -11,6 +11,15 @@ The complete project decision document supplied on 23 August 2026 is the approve
 - Automated lint, type-check, unit-test and build gates
 - Phase-by-phase review before commits or pushes
 
+## Implemented for Phase 1 review
+
+- Workbook-only first-pass analysis opens the financial results automatically after a valid import.
+- The initial workbook date range is analyzed without a setup questionnaire.
+- Machine, shift, product and result-status filters are available immediately.
+- Metric explanations, evidence and trends remain opt-in, while formula names and versions stay hidden from the dashboard.
+
+See `PHASE_1_REVIEW.md`.
+
 ## Implemented for Phase 2 review
 
 - Local `.xls` and `.xlsx` MMS workbook processing
