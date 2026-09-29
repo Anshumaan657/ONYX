@@ -25,7 +25,7 @@ function inRange(date: string | null, from: string, through: string): boolean { 
 function add(target: Totals, key: WorkbookMetricKey, value: number | null, ref: string): void { if (value === null) target[key].missing.add(`${ref}: value unavailable`); else { target[key].value += value; target[key].count += 1; } }
 function metric(key: WorkbookMetricKey, total: Totals[WorkbookMetricKey]): WorkbookMetric {
   const status: WorkbookMetricStatus = total.count === 0 ? "unavailable" : total.missing.size ? "partial" : "available";
-  return { key, label: labels[key], value: total.count ? total.value : null, unit: units[key], status, explanation: status === "available" ? "" : status === "partial" ? "A known subtotal is shown; some source rows are missing this field." : "The workbook does not provide enough values for this metric.", missing: [...total.missing].slice(0, 5) };
+  return { key, label: labels[key], value: total.count ? total.value : null, unit: units[key], status, explanation: status === "available" ? "Read directly from eligible MMS workbook records." : status === "partial" ? "A known subtotal is shown; some source rows are missing this field." : "The workbook does not provide enough values for this metric.", missing: [...total.missing].slice(0, 5) };
 }
 
 const comparableDefinitions: Array<{ field: string; unit: "quantity" | "hours" }> = [
