@@ -96,6 +96,7 @@ export type MmsDataIssueCode =
   | "INVALID_DURATION"
   | "INVALID_INTERVAL"
   | "INVALID_NUMBER"
+  | "AMBIGUOUS_LABOUR_RATE"
   | "MISSING_MACHINE"
   | "MISSING_MACHINE_TYPE"
   | "MISSING_OPERATOR"
@@ -190,6 +191,8 @@ export type CanonicalProductionRecord = CanonicalMmsRecordBase & {
     component: number | null;
     machinePerHour: number | null;
     operatorPerHour: number | null;
+    /** Parsed alternatives retained for reconciliation; never used for strict totals. */
+    operatorPerHourCandidates?: number[];
   };
   scrapPerPart: number | null;
   qualityInterlock: string;
@@ -222,6 +225,16 @@ export type MmsImportStats = {
   invalidCoreRowRate: number;
 };
 
+export type MmsExcelTotalRow = {
+  sheet: MmsCanonicalSheetName;
+  rowNumber: number;
+  reportedProduction: number | null;
+  componentCost: number | null;
+  machineCost: number | null;
+  labourCost: number | null;
+  comparableFields?: Partial<Record<string, number | null>>;
+};
+
 export type CanonicalMmsImport = {
   source: {
     company: string;
@@ -236,6 +249,7 @@ export type CanonicalMmsImport = {
   downtimeRecords: CanonicalDowntimeRecord[];
   dataIssues: MmsDataIssue[];
   stats: MmsImportStats;
+  excelTotalRows?: MmsExcelTotalRow[];
 };
 
 export type MmsImportSummary = {
@@ -250,6 +264,7 @@ export type MmsImportSummary = {
   downtimeRecordCount: number;
   issuePreview: MmsDataIssue[];
   totalDataIssueCount: number;
+  excelTotalRows?: MmsExcelTotalRow[];
 };
 
 export type MmsParseWorkerRequest = {

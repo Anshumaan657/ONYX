@@ -74,11 +74,21 @@ function numeric(value: unknown): number | null {
  * Values such as `115,115` are combined operator rates, not 115115 INR/hour.
  */
 function hourlyRate(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value >= 0 && value <= 10_000 ? value : null;
   const raw = clean(value);
   if (!raw || TEXT_MISSING_MARKERS.has(raw.toUpperCase()) || raw.includes(",")) return null;
   const parsed = Number(raw);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  return Number.isFinite(parsed) && parsed >= 0 && parsed <= 10_000 ? parsed : null;
+}
+
+function labourRateCandidates(value: unknown): { strict: number | null; candidates: number[]; ambiguous: boolean } {
+  const raw = clean(value);
+  if (!raw || TEXT_MISSING_MARKERS.has(raw.toUpperCase())) return { strict: null, candidates: [], ambiguous: false };
+  const parts = raw.split(",").map((part) => Number(part.trim()));
+  const valid = parts.length > 0 && parts.every((part) => Number.isFinite(part) && part >= 0 && part <= 10_000);
+  if (raw.includes(",")) return { strict: null, candidates: valid ? parts : [], ambiguous: true };
+  const strict = hourlyRate(value);
+  return strict === null ? { strict: null, candidates: [], ambiguous: true } : { strict, candidates: [strict], ambiguous: false };
 }
 
 function stableHash(value: string): string {
@@ -315,6 +325,23 @@ function isDowntimeTotalRow(row: MmsContractSourceRow): boolean {
   return isTotalLabel(row.values.Machine) || isTotalLabel(row.values.Shift);
 }
 
+function excelTotalRow(row: MmsContractSourceRow, sheet: "Product Log Book" | "Down Time Details") {
+  const comparableFields: Record<string, number | null> = {};
+  const numericFields = ["Qty", "Stroke", "Shift Target", "Opr. Time Target", "Product Loss", "Reject Qty", "Rework Qty", "Error Stroke"] as const;
+  for (const field of numericFields) comparableFields[field] = numeric(row.values[field]);
+  const durationFields = ["Shift Time", "Allowed Time", "Opr. Time", "Non Opr. Time", "Down Time", "System Off", "Duration"] as const;
+  for (const field of durationFields) comparableFields[field] = clockDurationSeconds(row.values[field]);
+  return {
+    sheet,
+    rowNumber: row.rowNumber,
+    reportedProduction: numeric(row.values.Qty),
+    componentCost: numeric(row.values["Component Cost"]),
+    machineCost: numeric(row.values["Running Hrs Cost"]),
+    labourCost: numeric(row.values["Operator Per Hrs Cost"]),
+    comparableFields,
+  };
+}
+
 function addIssue(
   issues: MmsDataIssue[],
   record: TimelineRecord,
@@ -518,6 +545,7 @@ function parseProductionRecord(
   const multiplier = numeric(values["M. Factor"]);
   const calculatedFromStroke =
     stroke != null && multiplier != null ? stroke * multiplier : null;
+  const labourRate = labourRateCandidates(values["Operator Per Hrs Cost"]);
   const fingerprint = [
     PRODUCT_SHEET,
     businessDate,
@@ -591,7 +619,8 @@ function parseProductionRecord(
       part: numeric(values["Part Cost"]),
       component: numeric(values["Component Cost"]),
       machinePerHour: numeric(values["Running Hrs Cost"]),
-      operatorPerHour: hourlyRate(values["Operator Per Hrs Cost"]),
+      operatorPerHour: labourRate.strict,
+      operatorPerHourCandidates: labourRate.candidates,
     },
     scrapPerPart: numeric(values["Scrap part"]),
     qualityInterlock: clean(values["Quality Interlock"]),
@@ -660,6 +689,9 @@ function parseProductionRecord(
       "Machine Type",
     );
   }
+  if (labourRate.ambiguous) {
+    addIssue(issues, record, "AMBIGUOUS_LABOUR_RATE", "warning", "Operator Per Hrs Cost is ambiguous or outside the supported hourly-rate range; it is excluded from strict labour totals. Alternative values are retained for reconciliation only.", "Operator Per Hrs Cost");
+  }
 
   const durationFields: Array<[string, unknown, number | null, boolean]> = [
     ["Opr. Time", values["Opr. Time"], record.timesSeconds.operative, true],
@@ -694,7 +726,6 @@ function parseProductionRecord(
     ["Part Cost", values["Part Cost"], record.costs.part, false],
     ["Component Cost", values["Component Cost"], record.costs.component, false],
     ["Running Hrs Cost", values["Running Hrs Cost"], record.costs.machinePerHour, false],
-    ["Operator Per Hrs Cost", values["Operator Per Hrs Cost"], record.costs.operatorPerHour, false],
     ["Scrap part", values["Scrap part"], record.scrapPerPart, false],
   ];
   for (const [field, raw, parsed, required] of numberFields) {
@@ -994,6 +1025,10 @@ export function canonicalizeMmsRows(options: {
   const downtimeRows = extracted.downtimeRows.filter(
     (row) => !isDowntimeTotalRow(row),
   );
+  const excelTotalRows = [
+    ...extracted.productionRows.filter(isProductionTotalRow).map((row) => excelTotalRow(row, PRODUCT_SHEET)),
+    ...extracted.downtimeRows.filter(isDowntimeTotalRow).map((row) => excelTotalRow(row, DOWNTIME_SHEET)),
+  ];
   const issues: MmsDataIssue[] = [];
   const productionRecords = productionRows.map((row) =>
     parseProductionRecord(row, issues),
@@ -1033,6 +1068,7 @@ export function canonicalizeMmsRows(options: {
     downtimeRecords,
     dataIssues: issues,
     stats,
+    excelTotalRows,
   };
 }
 
@@ -1134,5 +1170,6 @@ export function summarizeMmsImport(result: CanonicalMmsImport): MmsImportSummary
     downtimeRecordCount: result.downtimeRecords.length,
     issuePreview,
     totalDataIssueCount: result.dataIssues.length,
+    excelTotalRows: result.excelTotalRows,
   };
 }
