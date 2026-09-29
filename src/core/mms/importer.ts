@@ -70,6 +70,17 @@ function numeric(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+/** Hourly rates are deliberately stricter than generic numeric cells.
+ * Values such as `115,115` are combined operator rates, not 115115 INR/hour.
+ */
+function hourlyRate(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const raw = clean(value);
+  if (!raw || TEXT_MISSING_MARKERS.has(raw.toUpperCase()) || raw.includes(",")) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 function stableHash(value: string): string {
   let hash = 0x811c9dc5;
   for (let index = 0; index < value.length; index += 1) {
@@ -580,7 +591,7 @@ function parseProductionRecord(
       part: numeric(values["Part Cost"]),
       component: numeric(values["Component Cost"]),
       machinePerHour: numeric(values["Running Hrs Cost"]),
-      operatorPerHour: numeric(values["Operator Per Hrs Cost"]),
+      operatorPerHour: hourlyRate(values["Operator Per Hrs Cost"]),
     },
     scrapPerPart: numeric(values["Scrap part"]),
     qualityInterlock: clean(values["Quality Interlock"]),
