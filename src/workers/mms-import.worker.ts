@@ -11,7 +11,7 @@ import type {
 } from "@/core/mms";
 import { calculateHistoricalFinancials } from "@/core/historical";
 import type { ForecastValidationWorkerRequest, ForecastValidationWorkerResponse, ForecastWorkerRequest, ForecastWorkerResponse, HistoricalWorkerRequest, HistoricalWorkerResponse, WorkbookMetricsWorkerRequest, WorkbookMetricsWorkerResponse } from "@/core/historical";
-import { forecastHistorical, validateForecast } from "@/core/forecast";
+import { forecastValidated, validateForecast } from "@/core/forecast";
 import { calculateWorkbookMetrics } from "@/core/workbook";
 
 let activeImport: CanonicalMmsImport | null = null;
@@ -51,7 +51,13 @@ self.addEventListener(
     }
     if (request.type === "forecast") {
       if (!activeImport) { respond({ type: "forecast_failure", requestId: request.requestId, message: "Import the MMS workbook before forecasting." }); return; }
-      try { const historical = calculateHistoricalFinancials(activeImport, request.request.master, request.request.from, request.request.through, new Date().toISOString(), request.request.filters); respond({ type: "forecast_success", requestId: request.requestId, report: forecastHistorical(historical) }); }
+      try {
+        const report = forecastValidated(activeImport, request.request.master, request.request.from, request.request.through, request.request.filters);
+        const validation = validateForecast(activeImport, request.request.master, request.request.from, request.request.through, request.request.filters);
+        report.confidence = validation.confidence;
+        report.backtest = { method: validation.method, confidence: validation.confidence, passed: validation.passed, trainingFrom: validation.trainingFrom, trainingThrough: validation.trainingThrough, evaluationFrom: validation.evaluationFrom, evaluationThrough: validation.evaluationThrough, explanation: validation.explanation };
+        respond({ type: "forecast_success", requestId: request.requestId, report });
+      }
       catch (error) { respond({ type: "forecast_failure", requestId: request.requestId, message: error instanceof Error ? error.message : "Forecast could not be completed." }); }
       return;
     }
