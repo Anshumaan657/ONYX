@@ -107,7 +107,9 @@ function daysInMonth(date: string): number { const [year, month] = date.split("-
 
 function metric(key: HistoricalMetricKey, state: Accumulator, forcedStatus?: MetricStatus, explanation?: string): HistoricalMetric {
   const status = forcedStatus ?? (state.hasValue ? state.missing.size ? "partial" : "available" : "unavailable");
-  return { key, label: labels[key], status, exactValue: state.hasValue ? state.value.toJSON() : null, unit: key === "profitMargin" ? "percent" : "INR", formula: formulas[key], formulaVersion: "1.0.0", explanation: explanation ?? (status === "available" ? `${labels[key]} was calculated from the eligible records and rates for this period.` : status === "partial" ? `A known subtotal is shown, but ${labels[key].toLowerCase()} is incomplete because some required information is missing.` : `${labels[key]} is unavailable because required information is missing.`), missing: [...state.missing].slice(0, 20), warnings: [...state.warnings].slice(0, 20), evidenceRefs: [...state.evidence].slice(0, 100) };
+  const proxy = key === "materialCost" && [...state.warnings].some(item => item.includes("Component Cost used"));
+  const label = proxy ? "Material Cost (component proxy)" : labels[key];
+  return { key, label, status, exactValue: state.hasValue ? state.value.toJSON() : null, unit: key === "profitMargin" ? "percent" : "INR", formula: formulas[key], formulaVersion: "1.0.0", explanation: explanation ?? (proxy ? "A component-cost proxy is shown because true material consumption or BOM cost is unavailable." : status === "available" ? `${label} was calculated from the eligible records and rates for this period.` : status === "partial" ? `A known subtotal is shown, but ${label.toLowerCase()} is incomplete because some required information is missing.` : `${label} is unavailable because required information is missing.`), missing: [...state.missing].slice(0, 20), warnings: [...state.warnings].slice(0, 20), evidenceRefs: [...state.evidence].slice(0, 100) };
 }
 
 function calculateDay(master: FinancialMaster, records: CanonicalProductionRecord[], date: string): HistoricalDayResult {
@@ -142,9 +144,9 @@ function calculateDay(master: FinancialMaster, records: CanonicalProductionRecor
     if (product && converted) {
       const material = value(product, "materialCost");
       if (material) add(state.materialCost, formula("material-cost", { reported: converted.quantity, material_per_unit: material }), ref, warningFor(product));
-      else if (record.costs.component !== null && record.costs.component >= 0) add(state.materialCost, formula("material-cost", { reported, material_per_unit: exact(plain(record.costs.component)) }), ref, "Workbook Component Cost used as an estimated material-rate fallback; confirm its business meaning.");
+      else if (record.costs.component !== null && record.costs.component >= 0) { add(state.materialCost, formula("material-cost", { reported, material_per_unit: exact(plain(record.costs.component)) }), ref, "Workbook Component Cost used as an estimated material-rate fallback; confirm its business meaning."); miss(state.materialCost, `${ref}: true material consumption or BOM cost is unavailable; component cost is only a proxy.`); }
       else miss(state.materialCost, `${ref}: material cost is missing.`);
-    } else if (record.costs.component !== null && record.costs.component >= 0) add(state.materialCost, formula("material-cost", { reported, material_per_unit: exact(plain(record.costs.component)) }), ref, "Workbook Component Cost used as an estimated material-rate fallback; confirm its business meaning.");
+    } else if (record.costs.component !== null && record.costs.component >= 0) { add(state.materialCost, formula("material-cost", { reported, material_per_unit: exact(plain(record.costs.component)) }), ref, "Workbook Component Cost used as an estimated material-rate fallback; confirm its business meaning."); miss(state.materialCost, `${ref}: true material consumption or BOM cost is unavailable; component cost is only a proxy.`); }
     else miss(state.materialCost, `${ref}: product mapping and material cost are missing.`);
 
     const running = record.timesSeconds.operative;

@@ -6,15 +6,15 @@ import { forecastWorkbookBaseline } from "./baseline";
 export type WorkbookMetricStatus = "available" | "partial" | "unavailable";
 export type WorkbookReconciliationStatus = "Comparable" | "Partial source values" | "Not comparable" | "Missing Excel total" | "Unit mismatch" | "ONYX-calculated";
 export type WorkbookReconciliationField = { field: string; status: WorkbookReconciliationStatus; excelTotal: number | null; onyxTotal: number | null; difference: number | null; unit: "quantity" | "hours" | "INR" | "rate" | "text"; reason: string };
-export type WorkbookMetricKey = "reportedProduction" | "acceptedProduction" | "rejectedQuantity" | "reworkedQuantity" | "errorStroke" | "productionLoss" | "operativeHours" | "downtimeHours" | "setupHours" | "systemOffHours" | "componentCost" | "machineCost" | "labourCost" | "costPerReportedUnit";
+export type WorkbookMetricKey = "reportedProduction" | "acceptedProduction" | "rejectedQuantity" | "reworkedQuantity" | "errorStroke" | "productionLoss" | "operativeHours" | "downtimeHours" | "setupHours" | "systemOffHours" | "componentCost" | "machineCost" | "labourCost" | "totalDirectCost" | "costPerReportedUnit";
 export type WorkbookMetric = { key: WorkbookMetricKey; label: string; value: number | null; unit: "quantity" | "hours" | "INR"; status: WorkbookMetricStatus; explanation: string; missing: string[] };
 export type WorkbookDailyPoint = { date: string; reported: number | null; accepted: number | null; rejected: number | null; reworked: number | null; downtimeHours: number | null };
 export type WorkbookReconciliation = { rowsRead: number; rowsIncluded: number; rowsExcluded: number; duplicateRowsExcluded: number; invalidRowsExcluded: number; invalidDateDurationRowsExcluded: number; invalidNumericRowsExcluded: number; missingCostRows: { component: number; machine: number; labour: number }; ambiguousLabourRateRows: number; labourImpacts: { strict: number | null; firstRate: number | null; allRates: number | null }; excelTotalRows: NonNullable<CanonicalMmsImport["excelTotalRows"]>; fields: WorkbookReconciliationField[] };
 export type WorkbookMetricsReport = { from: string; through: string; sourceRows: number; downtimeRows: number; totals: Record<WorkbookMetricKey, WorkbookMetric>; kpis: ReturnType<typeof buildWorkbookBreakdowns>["kpis"]; breakdowns: ReturnType<typeof buildWorkbookBreakdowns>["breakdowns"]; daily: WorkbookDailyPoint[]; baselineForecast: ReturnType<typeof forecastWorkbookBaseline>; warnings: string[]; reconciliation?: WorkbookReconciliation };
 
-const keys: WorkbookMetricKey[] = ["reportedProduction", "acceptedProduction", "rejectedQuantity", "reworkedQuantity", "errorStroke", "productionLoss", "operativeHours", "downtimeHours", "setupHours", "systemOffHours", "componentCost", "machineCost", "labourCost", "costPerReportedUnit"];
-const labels: Record<WorkbookMetricKey, string> = { reportedProduction: "Reported production", acceptedProduction: "Accepted production", rejectedQuantity: "Rejected quantity", reworkedQuantity: "Reworked quantity", errorStroke: "Error stroke", productionLoss: "Production loss", operativeHours: "Operative hours", downtimeHours: "Downtime hours", setupHours: "Setup hours", systemOffHours: "System-off hours", componentCost: "Component cost (material proxy)", machineCost: "Machine cost", labourCost: "Labour cost", costPerReportedUnit: "Cost per reported unit" };
-const units: Record<WorkbookMetricKey, WorkbookMetric["unit"]> = { reportedProduction: "quantity", acceptedProduction: "quantity", rejectedQuantity: "quantity", reworkedQuantity: "quantity", errorStroke: "quantity", productionLoss: "quantity", operativeHours: "hours", downtimeHours: "hours", setupHours: "hours", systemOffHours: "hours", componentCost: "INR", machineCost: "INR", labourCost: "INR", costPerReportedUnit: "INR" };
+const keys: WorkbookMetricKey[] = ["reportedProduction", "acceptedProduction", "rejectedQuantity", "reworkedQuantity", "errorStroke", "productionLoss", "operativeHours", "downtimeHours", "setupHours", "systemOffHours", "componentCost", "machineCost", "labourCost", "totalDirectCost", "costPerReportedUnit"];
+const labels: Record<WorkbookMetricKey, string> = { reportedProduction: "Reported production", acceptedProduction: "Accepted production", rejectedQuantity: "Rejected quantity", reworkedQuantity: "Reworked quantity", errorStroke: "Error stroke", productionLoss: "Production loss", operativeHours: "Operative hours", downtimeHours: "Workbook downtime hours", setupHours: "Setup hours", systemOffHours: "System-off hours", componentCost: "Component cost (material proxy)", machineCost: "Machine cost", labourCost: "Labour cost", totalDirectCost: "Total measurable direct cost", costPerReportedUnit: "Known direct cost per reported unit" };
+const units: Record<WorkbookMetricKey, WorkbookMetric["unit"]> = { reportedProduction: "quantity", acceptedProduction: "quantity", rejectedQuantity: "quantity", reworkedQuantity: "quantity", errorStroke: "quantity", productionLoss: "quantity", operativeHours: "hours", downtimeHours: "hours", setupHours: "hours", systemOffHours: "hours", componentCost: "INR", machineCost: "INR", labourCost: "INR", totalDirectCost: "INR", costPerReportedUnit: "INR" };
 type Totals = Record<WorkbookMetricKey, { value: number; count: number; missing: Set<string> }>;
 function blank(): Totals { return Object.fromEntries(keys.map(key => [key, { value: 0, count: 0, missing: new Set<string>() }])) as Totals; }
 function number(value: number | null): number | null { return value !== null && Number.isFinite(value) && value >= 0 ? value : null; }
@@ -77,10 +77,11 @@ function reconciliationFields(records: CanonicalProductionRecord[], downtimeReco
     { field: "Component Cost Amount", status: "ONYX-calculated", excelTotal: null, onyxTotal: totals.componentCost.count ? totals.componentCost.value : null, difference: null, unit: "INR", reason: "Calculated as SUM(Qty × valid Component Cost)." },
     { field: "Machine Cost", status: "ONYX-calculated", excelTotal: null, onyxTotal: totals.machineCost.count ? totals.machineCost.value : null, difference: null, unit: "INR", reason: "Calculated as SUM(Opr. Time hours × valid Running Hrs Cost)." },
     { field: "Labour Cost", status: "ONYX-calculated", excelTotal: null, onyxTotal: totals.labourCost.count ? totals.labourCost.value : null, difference: null, unit: "INR", reason: "Calculated as SUM(Opr. Time hours × valid Operator Per Hrs Cost)." },
+    { field: "Total Measurable Direct Cost", status: "ONYX-calculated", excelTotal: null, onyxTotal: totals.totalDirectCost.count ? totals.totalDirectCost.value : null, difference: null, unit: "INR", reason: "Component-cost proxy + machine cost + strict labour cost; incomplete categories remain partial." },
   );
   return fields;
 }
-function downtimeHours(source: CanonicalDowntimeRecord[], from: string, through: string, filters: HistoricalFilters): number { return source.filter(row => row.includedInTotals && inRange(row.businessDate, from, through) && (!filters.machine || normal(row.machine) === normal(filters.machine)) && (!filters.shift || normal(row.shift) === normal(filters.shift))).reduce((sum, row) => sum + (hours(row.durationSeconds) ?? 0), 0); }
+function downtimeHours(source: CanonicalDowntimeRecord[], from: string, through: string, filters: HistoricalFilters): number { return source.filter(row => row.includedInTotals && inRange(row.businessDate, from, through) && (!filters.product || normal(row.productName) === normal(filters.product)) && (!filters.machine || normal(row.machine) === normal(filters.machine)) && (!filters.shift || normal(row.shift) === normal(filters.shift))).reduce((sum, row) => sum + (hours(row.durationSeconds) ?? 0), 0); }
 function dailyPoints(records: CanonicalProductionRecord[], downtime: CanonicalDowntimeRecord[], filters: HistoricalFilters): WorkbookDailyPoint[] {
   const dates = new Set<string>();
   for (const row of records) if (row.businessDate) dates.add(row.businessDate);
@@ -89,7 +90,7 @@ function dailyPoints(records: CanonicalProductionRecord[], downtime: CanonicalDo
     const rows = records.filter(row => row.businessDate === date), downtimeRows = downtime.filter(row => row.businessDate === date && (!filters.machine || normal(row.machine) === normal(filters.machine)));
     const sum = (field: "reported" | "rejected" | "reworked") => { const values = rows.map(row => number(row.quantities[field === "reported" ? "reported" : field])).filter((value): value is number => value !== null); return values.length === rows.length && rows.length ? values.reduce((total, value) => total + value, 0) : null; };
     const reported = sum("reported"), rejected = sum("rejected"), reworked = sum("reworked");
-    return { date, reported, accepted: reported === null ? null : Math.max(0, reported - (rejected ?? 0) - (reworked ?? 0)), rejected, reworked, downtimeHours: downtimeRows.length ? downtimeRows.reduce((total, row) => total + (hours(row.durationSeconds) ?? 0), 0) : null };
+    return { date, reported, accepted: reported === null || rejected === null ? null : Math.max(0, reported - rejected), rejected, reworked, downtimeHours: downtimeRows.length ? downtimeRows.reduce((total, row) => total + (hours(row.durationSeconds) ?? 0), 0) : null };
   });
 }
 
@@ -103,7 +104,7 @@ export function calculateWorkbookMetrics(source: CanonicalMmsImport, from: strin
     const ref = `${row.sourceSheet} row ${row.sourceRow}`;
     const reported = number(row.quantities.reported), rejected = number(row.quantities.rejected), reworked = number(row.quantities.reworked), error = number(row.quantities.errorStroke), loss = number(row.quantities.productionLoss);
     add(totals, "reportedProduction", reported, ref); add(totals, "rejectedQuantity", rejected, ref); add(totals, "reworkedQuantity", reworked, ref); add(totals, "errorStroke", error, ref); add(totals, "productionLoss", loss, ref);
-    add(totals, "acceptedProduction", reported === null ? null : Math.max(0, reported - (rejected ?? 0) - (reworked ?? 0)), ref);
+    add(totals, "acceptedProduction", reported === null || rejected === null ? null : Math.max(0, reported - rejected), ref);
     add(totals, "operativeHours", hours(row.timesSeconds.operative), ref); add(totals, "setupHours", hours(row.timesSeconds.setup), ref); add(totals, "systemOffHours", hours(row.timesSeconds.systemOff), ref);
     const rowHours = hours(row.timesSeconds.operative);
     if (reported === null || number(row.costs.component) === null) missingCostRows.component += 1;
@@ -117,13 +118,19 @@ export function calculateWorkbookMetrics(source: CanonicalMmsImport, from: strin
     if (rowHours !== null && candidates.length) { firstRateLabour += rowHours * candidates[0]; firstRateRows += 1; allRatesLabour += rowHours * candidates.reduce((sum, value) => sum + value, 0); allRateRows += 1; }
   }
   const downtime = downtimeHours(source.downtimeRecords, from, through, filters);
-  totals.downtimeHours.value = downtime; totals.downtimeHours.count = source.downtimeRecords.filter(row => row.includedInTotals && inRange(row.businessDate, from, through) && (!filters.machine || normal(row.machine) === normal(filters.machine)) && (!filters.shift || normal(row.shift) === normal(filters.shift))).length;
+  totals.downtimeHours.value = downtime; totals.downtimeHours.count = source.downtimeRecords.filter(row => row.includedInTotals && inRange(row.businessDate, from, through) && (!filters.product || normal(row.productName) === normal(filters.product)) && (!filters.machine || normal(row.machine) === normal(filters.machine)) && (!filters.shift || normal(row.shift) === normal(filters.shift))).length;
   if (!totals.downtimeHours.count) totals.downtimeHours.missing.add("No valid downtime record covers this range.");
   const cost = ["componentCost", "machineCost", "labourCost"] as const;
-  if (totals.reportedProduction.count) { const totalCost = cost.reduce((sum, key) => sum + totals[key].value, 0); const complete = cost.every(key => totals[key].count > 0 && !totals[key].missing.size); totals.costPerReportedUnit.value = totalCost / totals.reportedProduction.value; totals.costPerReportedUnit.count = complete ? 1 : 0; if (!complete) totals.costPerReportedUnit.missing.add("One or more workbook cost fields are incomplete."); }
+  const totalCost = cost.reduce((sum, key) => sum + totals[key].value, 0);
+  const complete = cost.every(key => totals[key].count > 0 && !totals[key].missing.size);
+  const anyCost = cost.some(key => totals[key].count > 0);
+  totals.totalDirectCost.value = totalCost;
+  totals.totalDirectCost.count = anyCost ? 1 : 0;
+  if (anyCost && !complete) totals.totalDirectCost.missing.add("Some direct-cost categories are incomplete; this is not full operating cost.");
+  if (totals.reportedProduction.count && totals.reportedProduction.value > 0) { totals.costPerReportedUnit.value = totalCost / totals.reportedProduction.value; totals.costPerReportedUnit.count = anyCost ? 1 : 0; if (!complete) totals.costPerReportedUnit.missing.add("One or more workbook cost fields are incomplete; this is a measurable direct-cost proxy, not full operating cost."); }
   const warnings = source.dataIssues.length ? [`${source.dataIssues.length.toLocaleString()} source data findings remain available for review.`] : [];
   const analysis = buildWorkbookBreakdowns(source, from, through, filters);
-  const daily = dailyPoints(records, source.downtimeRecords.filter(row => row.includedInTotals && inRange(row.businessDate, from, through)), filters);
+  const daily = dailyPoints(records, source.downtimeRecords.filter(row => row.includedInTotals && inRange(row.businessDate, from, through) && (!filters.product || normal(row.productName) === normal(filters.product)) && (!filters.machine || normal(row.machine) === normal(filters.machine)) && (!filters.shift || normal(row.shift) === normal(filters.shift))), filters);
   const excluded = readRecords.filter(row => !row.includedInTotals);
   const issueCodes = (code: string) => excluded.filter(row => (row.issueCodes ?? []).includes(code as never)).length;
   const ambiguousLabourRateRows = readRecords.filter(row => (row.issueCodes ?? []).includes("AMBIGUOUS_LABOUR_RATE")).length;

@@ -13,12 +13,14 @@ describe("workbook-only metrics", () => {
   it("aggregates production, quality, time and workbook cost fields", () => {
     const report = calculateWorkbookMetrics(source([production()], [{ includedInTotals: true, businessDate: "2023-08-18", durationSeconds: 1800 }]), "2023-08-18", "2023-08-18");
     expect(report.totals.reportedProduction.value).toBe(100);
-    expect(report.totals.acceptedProduction.value).toBe(92);
+    expect(report.totals.acceptedProduction.value).toBe(95);
     expect(report.totals.rejectedQuantity.value).toBe(5);
     expect(report.totals.downtimeHours.value).toBe(0.5);
     expect(report.totals.componentCost.value).toBe(1000);
     expect(report.totals.machineCost.value).toBe(40);
     expect(report.totals.labourCost.value).toBe(10);
+    expect(report.totals.totalDirectCost.value).toBe(1050);
+    expect(report.totals.costPerReportedUnit.value).toBe(10.5);
   });
 
   it("keeps missing source values partial instead of treating them as zero", () => {
@@ -27,6 +29,18 @@ describe("workbook-only metrics", () => {
     expect(report.totals.machineCost.status).toBe("unavailable");
     expect(report.totals.labourCost.status).toBe("unavailable");
     expect(report.totals.reportedProduction.value).toBe(100);
+  });
+
+  it("shows a partial direct-cost-per-unit proxy when only some costs are known", () => {
+    const report = calculateWorkbookMetrics(source([production({ costs: { component: 10, machinePerHour: null, operatorPerHour: null } })]), "2023-08-18", "2023-08-18");
+    expect(report.totals.costPerReportedUnit.value).toBe(10);
+    expect(report.totals.costPerReportedUnit.status).toBe("partial");
+  });
+
+  it("does not treat a missing rejection quantity as zero accepted loss", () => {
+    const report = calculateWorkbookMetrics(source([production({ quantities: { reported: 100, rejected: null, reworked: 3, errorStroke: 2, productionLoss: 4 } })]), "2023-08-18", "2023-08-18");
+    expect(report.totals.acceptedProduction.value).toBeNull();
+    expect(report.totals.acceptedProduction.status).toBe("unavailable");
   });
 
   it("applies product, machine and shift filters", () => {
@@ -38,7 +52,7 @@ describe("workbook-only metrics", () => {
   it("returns sorted daily points for trend views", () => {
     const report = calculateWorkbookMetrics(source([production({ businessDate: "2023-08-19", sourceRow: 8 }), production({ businessDate: "2023-08-18", sourceRow: 7 })]), "2023-08-18", "2023-08-19");
     expect(report.daily.map(point => point.date)).toEqual(["2023-08-18", "2023-08-19"]);
-    expect(report.daily[0].accepted).toBe(92);
+    expect(report.daily[0].accepted).toBe(95);
   });
 
   it("keeps strict labour totals separate from ambiguous reconciliation impacts", () => {

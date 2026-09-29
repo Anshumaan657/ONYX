@@ -6,5 +6,5 @@ export { buildWorkbookReleaseChecks } from "./release-checks";
 export type { WorkbookBaselineForecast, WorkbookBaselineMetric } from "./baseline";
 export type { WorkbookActionPlan } from "./actions";
 export type { WorkbookReleaseCheck } from "./release-checks";
-export type { WorkbookDailyPoint, WorkbookMetric, WorkbookMetricKey, WorkbookMetricsReport, WorkbookMetricStatus } from "./metrics";
+export type { WorkbookDailyPoint, WorkbookMetric, WorkbookMetricKey, WorkbookMetricsReport, WorkbookMetricStatus, WorkbookReconciliation, WorkbookReconciliationField, WorkbookReconciliationStatus } from "./metrics";
 export type { WorkbookBreakdownDimension, WorkbookBreakdownGroup, WorkbookBreakdowns, WorkbookKpis } from "./breakdowns";

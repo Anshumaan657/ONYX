@@ -19,3 +19,13 @@ Downtime remains an operational duration. It is not described as lost revenue, a
 The details panel reports rows read, included, excluded, duplicate and invalid exclusions, missing cost fields, ambiguous labour-rate rows, and detected workbook summary rows. It compares only additive quantities and normalized durations with Excel totals. Each field is labelled `Comparable`, `Partial source values`, `Missing Excel total`, `Not comparable`, or `ONYX-calculated`.
 
 Rate and per-unit columns are never summed as totals. Financial fields are marked `ONYX-calculated` and show their row-level formula instead. Historical metric cards keep formulas and evidence behind their opt-in “View details” control.
+
+The workbook-only direct-cost cards are:
+
+- Component cost proxy: `SUM(Qty × Component Cost)`
+- Machine cost: `SUM(Opr. Time hours × Running Hrs Cost)`
+- Strict labour cost: `SUM(Opr. Time hours × valid Operator Per Hrs Cost)`
+- Total measurable direct cost: the three amounts above
+- Known direct cost per reported unit: total measurable direct cost divided by reported quantity
+
+The per-unit and total-direct-cost cards are labelled partial because they cover measurable workbook direct costs only. They are not full operating cost, profit, or accounting results.
