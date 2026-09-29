@@ -54,7 +54,7 @@ export function AnalysisWorkspace() {
   function resetSource() { setSource(null); setAnalysisClient(null); setStep("import"); }
   return <main className="app-shell mx-auto min-h-screen w-full max-w-[1440px] px-[clamp(24px,4vw,64px)] py-5">
     <header className="app-header flex flex-wrap items-center justify-between gap-4">
-      <Link href="/" className="brand-home" aria-label="Onyx home"><span className="brand-wordmark">ONYX</span><span className="brand-subtitle">Local-first financial workspace</span></Link>
+      <Link href="/" className="brand-home" aria-label="Onyx home"><span className="brand-wordmark">ONYX</span></Link>
       <div className="header-actions"><span className="privacy-note">Private on your device · No cloud upload</span><button className="theme-toggle" type="button" role="switch" aria-checked={theme === "dark"} aria-label="Toggle dark mode" onClick={toggleTheme}><span className="theme-toggle-track" aria-hidden="true"><span className="theme-toggle-thumb" /></span><span className="theme-toggle-label">{theme === "dark" ? "Dark" : "Light"}</span></button></div>
     </header>
     <nav className="workflow-nav my-6 flex flex-wrap gap-2" aria-label="Analysis workflow">
