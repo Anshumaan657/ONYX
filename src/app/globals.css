@@ -85,7 +85,7 @@ button:disabled { opacity: .48; cursor: not-allowed; }
 .metric-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; min-width: 0; }
 .metric-card-copy { min-width: 0; }
 .metric-label { color: var(--color-ink); }
-.metric-value { white-space: nowrap; overflow-x: auto; max-width: 100%; }
+.metric-value { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
 .metric-qualifier { margin-top: .15rem; color: var(--color-muted); font-size: .75rem; }
 .metric-card > .setup-secondary { margin-top: auto; }
 .metric-detail-block { border-top: 1px solid var(--color-line); padding: .75rem; background: var(--color-canvas); }

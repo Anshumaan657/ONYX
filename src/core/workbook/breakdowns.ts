@@ -21,7 +21,7 @@ function add(group: WorkbookBreakdownGroup, row: CanonicalProductionRecord): voi
   const reported = finite(row.quantities.reported), rejected = finite(row.quantities.rejected), reworked = finite(row.quantities.reworked), operative = hours(row.timesSeconds.operative);
   group.records += 1;
   if (reported === null) group.reported = null; else if (group.reported !== null) group.reported += reported;
-  if (reported === null) group.accepted = null; else if (group.accepted !== null) group.accepted += Math.max(0, reported - (rejected ?? 0) - (reworked ?? 0));
+  if (reported === null || rejected === null) group.accepted = null; else if (group.accepted !== null) group.accepted += Math.max(0, reported - rejected);
   if (rejected === null) group.rejected = null; else if (group.rejected !== null) group.rejected += rejected;
   if (reworked === null) group.reworked = null; else if (group.reworked !== null) group.reworked += reworked;
   if (group.componentCost !== null) group.componentCost = reported === null || finite(row.costs.component) === null ? null : group.componentCost + reported * row.costs.component!;
@@ -36,7 +36,7 @@ function productionGroups(records: CanonicalProductionRecord[], dimension: Exclu
 function downtimeGroups(records: CanonicalDowntimeRecord[], filters: HistoricalFilters): WorkbookBreakdownGroup[] {
   const groups = new Map<string, WorkbookBreakdownGroup>();
   for (const row of records) {
-    if (!row.includedInTotals || (filters.machine && key(row.machine) !== key(filters.machine))) continue;
+    if (!row.includedInTotals || (filters.product && key(row.productName) !== key(filters.product)) || (filters.machine && key(row.machine) !== key(filters.machine)) || (filters.shift && key(row.shift) !== key(filters.shift))) continue;
     const name = row.reason || row.reasonType || "Unknown downtime reason", group = groups.get(key(name)) ?? blank(name);
     group.records += 1; group.downtimeHours += hours(row.durationSeconds); groups.set(key(name), group);
   }
