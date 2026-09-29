@@ -35,9 +35,9 @@ Every result is labelled as complete, partial or unavailable. Missing informatio
 
 ## Forecasting
 
-The current forecast is a transparent statistical baseline, not an ML model. It is called `recent-daily-average-v1` and uses up to the most recent 30 daily values in the selected historical report. Those averages are projected across the next 30 calendar days.
+The current forecast is a transparent validated statistical model, not an ML model. It is called `validated-segmented-weighted-v2`. It uses only included and valid workbook rows, prefers machine + product + shift history, falls back to broader groups when history is sparse, weights recent active days and matching weekdays, and excludes extreme baseline dates. Forecast totals are sums of daily predictions; daily averages are shown separately.
 
-The forecast clearly displays its assumptions and confidence. It does not invent future prices, costs, staffing, demand or shutdowns.
+The forecast clearly displays its assumptions, source exclusions, segment fallback and confidence. Confidence is assigned only from the validated backtest; otherwise it remains unavailable. It does not invent future prices, costs, staffing, demand or shutdowns.
 
 An optional 30-day backtest is available when at least 60 calendar days are available:
 
