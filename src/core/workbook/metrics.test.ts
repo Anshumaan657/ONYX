@@ -40,4 +40,16 @@ describe("workbook-only metrics", () => {
     expect(report.daily.map(point => point.date)).toEqual(["2023-08-18", "2023-08-19"]);
     expect(report.daily[0].accepted).toBe(92);
   });
+
+  it("keeps strict labour totals separate from ambiguous reconciliation impacts", () => {
+    const report = calculateWorkbookMetrics(source([
+      production({ costs: { component: 10, machinePerHour: 20, operatorPerHour: 5, operatorPerHourCandidates: [5] } }),
+      production({ sourceRow: 8, costs: { component: 10, machinePerHour: 20, operatorPerHour: null, operatorPerHourCandidates: [115, 115] }, issueCodes: ["AMBIGUOUS_LABOUR_RATE"] }),
+    ]), "2023-08-18", "2023-08-18");
+    expect(report.totals.labourCost.value).toBe(10);
+    expect(report.totals.labourCost.status).toBe("partial");
+    expect(report.reconciliation?.ambiguousLabourRateRows).toBe(1);
+    expect(report.reconciliation?.labourImpacts.firstRate).toBe(240);
+    expect(report.reconciliation?.labourImpacts.allRates).toBe(470);
+  });
 });

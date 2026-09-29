@@ -120,7 +120,17 @@ describe("MMS workbook importer", () => {
     const row = [...validProduction, "115,115"];
     const parsed = canonicalizeMmsRows({ workbook: workbook({ productionHeaders: headers, productionRows: [row] }), fileName: "rates.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", byteLength: 1, signatureVerified: true });
     expect(parsed.productionRecords[0].costs.operatorPerHour).toBeNull();
+    expect(parsed.productionRecords[0].costs.operatorPerHourCandidates).toEqual([115, 115]);
+    expect(parsed.dataIssues.some(issue => issue.code === "AMBIGUOUS_LABOUR_RATE")).toBe(true);
     expect(parsed.dataIssues.some(issue => issue.field === "Operator Per Hrs Cost")).toBe(true);
+  });
+
+  it("rejects suspiciously large single-value labour rates", () => {
+    const headers = [...productionHeaders, "Operator Per Hrs Cost"];
+    const parsed = canonicalizeMmsRows({ workbook: workbook({ productionHeaders: headers, productionRows: [[...validProduction, 115115]] }), fileName: "rates.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", byteLength: 1, signatureVerified: true });
+    expect(parsed.productionRecords[0].costs.operatorPerHour).toBeNull();
+    expect(parsed.productionRecords[0].costs.operatorPerHourCandidates).toEqual([]);
+    expect(parsed.dataIssues.some(issue => issue.code === "AMBIGUOUS_LABOUR_RATE")).toBe(true);
   });
 
   it.each([
