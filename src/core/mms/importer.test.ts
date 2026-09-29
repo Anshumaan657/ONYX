@@ -7,6 +7,7 @@ import {
   MmsDataQualityError,
   MmsWorkbookCompatibilityError,
   inspectMmsWorkbookCompatibility,
+  canonicalizeMmsRows,
   parseMmsWorkbookFile,
 } from "./index";
 
@@ -114,6 +115,14 @@ function fileBuffer(
 }
 
 describe("MMS workbook importer", () => {
+  it("rejects combined operator hourly rates instead of concatenating them", () => {
+    const headers = [...productionHeaders, "Operator Per Hrs Cost"];
+    const row = [...validProduction, "115,115"];
+    const parsed = canonicalizeMmsRows({ workbook: workbook({ productionHeaders: headers, productionRows: [row] }), fileName: "rates.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", byteLength: 1, signatureVerified: true });
+    expect(parsed.productionRecords[0].costs.operatorPerHour).toBeNull();
+    expect(parsed.dataIssues.some(issue => issue.field === "Operator Per Hrs Cost")).toBe(true);
+  });
+
   it.each([
     ["xlsx" as const, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
     ["xls" as const, "application/vnd.ms-excel"],
